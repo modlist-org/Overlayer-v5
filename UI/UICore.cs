@@ -425,7 +425,7 @@ internal static class UICore {
     private static Sequence menuSequence;
 
     public static void OpenMenu() {
-        menuSequence?.Kill(true);
+        menuSequence?.Kill();
 
         isMenuOpen = true;
 
@@ -447,7 +447,7 @@ internal static class UICore {
     }
 
     public static void CloseMenu() {
-        menuSequence?.Kill(true);
+        menuSequence?.Kill();
 
         menuCanvasGroup.interactable = false;
         menuCanvasGroup.blocksRaycasts = false;
