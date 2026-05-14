@@ -4,7 +4,7 @@ using Overlayer;
 using Overlayer.Async;
 using Overlayer.Localization;
 using Overlayer.Resource;
-using Overlayer.UI.Foundation;
+using Overlayer.UI;
 using Overlayer.UI.UISprites;
 using System.Collections;
 using System.Reflection;

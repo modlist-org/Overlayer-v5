@@ -7,12 +7,21 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace Overlayer.UI.Foundation;
+namespace Overlayer.UI;
+
+public enum MenuState {
+    Overlayer,
+    Settings,
+    Docs,
+    Credits,
+}
 
 internal static class UICore {
     private static GameObject canvasObj;
     public static Canvas Canvas { get; private set; }
     internal static CanvasScaler CanvasScaler;
+
+    internal static readonly Dictionary<MenuState, RectTransform> Pages = [];
 
     public static void Initialize() {
         canvasObj = new GameObject("OverlayerUICanvas");

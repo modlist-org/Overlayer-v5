@@ -445,7 +445,7 @@
 		<Compile Include="UI\Utilities\ResizeHandle.cs" />
 		<Compile Include="UI\Sprites\SpriteDatabase.cs" />
 		<Compile Include="UI\Sprites\SpriteFactory.cs" />
-		<Compile Include="UI\Foundation\UICore.cs" />
+		<Compile Include="UI\UICore.cs" />
 		<Compile Include="UI\Utilities\EmptyGraphic.cs" />
 		<Compile Include="UI\Utilities\NonRaycastButton.cs" />
 		<Content Include="Directory.Build.props" />
