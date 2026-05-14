@@ -23,6 +23,8 @@ internal static class ResourceManager {
 
     private static readonly Dictionary<Asset, object> cache = [];
 
+    public const string ResoucePath = "Overlayer.Resource.Embedded.";
+
     public static void Initialize() {
         if(initialized) {
             return;
@@ -30,16 +32,15 @@ internal static class ResourceManager {
 
         initialized = true;
 
-        string tempDir = Path.Combine(Core.FolderPath, "Temp");
+        string tempDir = Path.Combine(Core.OverlayerPath, "Temp");
         Directory.CreateDirectory(tempDir);
 
-        // FONT
         string fontPath = Path.Combine(tempDir, "SUIT-Regular.otf");
 
         if(!File.Exists(fontPath)) {
             File.WriteAllBytes(
                 fontPath,
-                ResourceLoader.Load("Overlayer.Resource.Font.SUIT-Regular.otf")
+                ResourceLoader.Load($"{ResoucePath}Font.SUIT-Regular.otf")
             );
         }
 
@@ -47,16 +48,16 @@ internal static class ResourceManager {
         cache[Asset.SUITRegular] = TMP_FontAsset.CreateFontAsset(font);
 
         var imageMap = new (Asset key, string path, FilterMode filter)[] {
-            (Asset.OV5LogoOutline256, "Overlayer.Resource.Image.OV5LogoOutline256.png", FilterMode.Bilinear),
-            (Asset.Circle256, "Overlayer.Resource.Image.Circle256.png", FilterMode.Bilinear),
-            (Asset.CircleHalf256, "Overlayer.Resource.Image.CircleHarf256.png", FilterMode.Bilinear),
-            (Asset.X128, "Overlayer.Resource.Image.X128.png", FilterMode.Bilinear),
-            (Asset.Monitor128, "Overlayer.Resource.Image.Monitor128.png", FilterMode.Bilinear),
-            (Asset.Gear128, "Overlayer.Resource.Image.Gear128.png", FilterMode.Bilinear),
-            (Asset.Image128, "Overlayer.Resource.Image.Image128.png", FilterMode.Bilinear),
-            (Asset.Text128, "Overlayer.Resource.Image.Text128.png", FilterMode.Bilinear),
-            (Asset.Book128, "Overlayer.Resource.Image.Book128.png", FilterMode.Bilinear),
-            (Asset.Star128, "Overlayer.Resource.Image.Star128.png", FilterMode.Bilinear),
+            (Asset.OV5LogoOutline256, $"{ResoucePath}Image.OV5LogoOutline256.png", FilterMode.Bilinear),
+            (Asset.Circle256, $"{ResoucePath}Image.Circle256.png", FilterMode.Bilinear),
+            (Asset.CircleHalf256, $"{ResoucePath}Image.CircleHarf256.png", FilterMode.Bilinear),
+            (Asset.X128, $"{ResoucePath}Image.X128.png", FilterMode.Bilinear),
+            (Asset.Monitor128, $"{ResoucePath}Image.Monitor128.png", FilterMode.Bilinear),
+            (Asset.Gear128, $"{ResoucePath}Image.Gear128.png", FilterMode.Bilinear),
+            (Asset.Image128, $"{ResoucePath}Image.Image128.png", FilterMode.Bilinear),
+            (Asset.Text128, $"{ResoucePath}Image.Text128.png", FilterMode.Bilinear),
+            (Asset.Book128, $"{ResoucePath}Image.Book128.png", FilterMode.Bilinear),
+            (Asset.Star128, $"{ResoucePath}Image.Star128.png", FilterMode.Bilinear),
         };
 
         foreach(var (key, path, filter) in imageMap) {

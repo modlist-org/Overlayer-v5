@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using UnityEngine;
 
-namespace Overlayer;
+namespace Overlayer.Async;
 
 internal sealed class MainThread : MonoBehaviour {
     private static readonly ConcurrentQueue<Action> queue = new();

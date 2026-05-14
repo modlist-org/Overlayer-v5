@@ -1,5 +1,8 @@
 ﻿using MelonLoader;
 using MelonLoader.Utils;
+using Overlayer;
+using Overlayer.Async;
+using Overlayer.Localization;
 using Overlayer.Resource;
 using Overlayer.UI;
 using Overlayer.UI.UISprites;
@@ -7,17 +10,18 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(Overlayer.Core), "Overlayer", "5.0.0", "modlist.org", "https://github.com/modlist-org/Overlayer-v5")]
+[assembly: MelonInfo(typeof(Core), Info.Name, Info.Version, Info.Author, Info.DownloadLink)]
 [assembly: MelonGame("7th Beat Games", "A Dance of Fire and Ice")]
 
 namespace Overlayer;
 
 public class Core : MelonMod {
-    public static readonly Version OverlayerVersion = new(5, 0, 0);
+    public static readonly Version OverlayerVersion = new(Overlayer.Info.Version);
     internal static Assembly OverlayerAssembly = Assembly.GetExecutingAssembly();
     internal static MelonLogger.Instance Logger;
     internal static GameObject OverlayerObject;
-    internal static string FolderPath = Path.Combine(
+    internal static Translator Lang;
+    public static readonly string OverlayerPath = Path.Combine(
         MelonEnvironment.UserDataDirectory,
         "Overlayer"
     );
@@ -40,6 +44,8 @@ public class Core : MelonMod {
 
     public override void OnInitializeMelon() {
         Logger = LoggerInstance;
+        Lang = new Translator();
+        _ = Lang.Load(Path.Combine(OverlayerPath, "Lang"));
         Initalize();
     }
 
