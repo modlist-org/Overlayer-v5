@@ -3,12 +3,12 @@ using TMPro;
 
 namespace Overlayer.Localization;
 
-public class LocalizedText : MonoBehaviour {
+public class TextLocalization : MonoBehaviour {
     public string Key;
     public string Default;
     private TMP_Text tmp;
 
-    public LocalizedText Init(string key, string defaultValue) {
+    public TextLocalization Init(string key, string defaultValue) {
         Key = key;
         Default = defaultValue;
         UpdateText();

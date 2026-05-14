@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using Overlayer;
 using Overlayer.Resource;
 using Overlayer.UI.UISprites;
 using TMPro;
@@ -6,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Overlayer.UI;
+namespace Overlayer.UI.Factory;
 
 public enum MenuState {
     Overlayer,
@@ -283,6 +284,63 @@ public static class MenuFactory {
                 tmp.color = Color.white;
                 tmp.lineSpacing = 18;
                 tmp.alignment = TextAlignmentOptions.Center;
+            }
+        }
+
+        {
+            var parent = Pages[MenuState.Settings];
+            var languages = Core.Lang.GetLanguages();
+            var nativeNames = Core.Lang.GetLanguageNativeNames();
+
+            {
+                GameObject obj = new("LanguageLabel");
+                obj.transform.SetParent(parent, false);
+
+                var rect = obj.AddComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = new Vector2(200, 50);
+                rect.anchoredPosition = new Vector2(-150, 100);
+
+                var tmp = obj.AddComponent<TextMeshProUGUI>();
+                tmp.text = Core.Lang.Get("L_SETTING_LANGUAGE", "Language");
+                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
+                tmp.fontSize = 24;
+                tmp.color = Color.white;
+                tmp.alignment = TextAlignmentOptions.Left;
+            }
+
+            {
+                GameObject obj = new("LanguageSelector");
+                obj.transform.SetParent(parent, false);
+
+                var rect = obj.AddComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = new Vector2(300, 50);
+                rect.anchoredPosition = new Vector2(100, 100);
+
+                var tmp = obj.AddComponent<TextMeshProUGUI>();
+
+                string currentNative = Core.Lang.GetForLanguage("0NATIVELANG", Core.Lang.Language, Core.Lang.Language);
+                tmp.text = $"< {currentNative} >";
+
+                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
+                tmp.fontSize = 24;
+                tmp.color = new Color(1f, 1f, 1f, 0.8f);
+                tmp.alignment = TextAlignmentOptions.Center;
+
+                var btn = obj.AddComponent<Button>();
+                btn.onClick.AddListener(() => {
+                    int currentIndex = Array.IndexOf(languages, Core.Lang.Language);
+                    int nextIndex = (currentIndex + 1) % languages.Length;
+
+                    Core.Lang.Language = languages[nextIndex];
+
+                    tmp.text = $"< {nativeNames[nextIndex]} >";
+                });
             }
         }
 

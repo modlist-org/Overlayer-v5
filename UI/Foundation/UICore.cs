@@ -1,15 +1,18 @@
 ﻿using DG.Tweening;
+using Overlayer.UI.Factory;
 using Overlayer.UI.UISprites;
+using Overlayer.UI.Utilities;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace Overlayer.UI;
+namespace Overlayer.UI.Foundation;
 
 internal static class UICore {
     private static GameObject canvasObj;
     public static Canvas Canvas { get; private set; }
+    internal static CanvasScaler CanvasScaler;
 
     public static void Initialize() {
         canvasObj = new GameObject("OverlayerUICanvas");
@@ -20,9 +23,9 @@ internal static class UICore {
         Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         Canvas.sortingOrder = 32767;
 
-        var scaler = canvasObj.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new(1920, 1080);
+        CanvasScaler = canvasObj.AddComponent<CanvasScaler>();
+        CanvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        CanvasScaler.referenceResolution = new(1920, 1080);
 
         canvasObj.AddComponent<GraphicRaycaster>();
 

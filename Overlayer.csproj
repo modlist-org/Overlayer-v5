@@ -440,14 +440,14 @@
 		<Compile Include="Overlay\Overlay.cs" />
 		<Compile Include="Resource/ResourceLoader.cs" />
 		<Compile Include="Resource/ResourceManager.cs" />
-		<Compile Include="UI/DragHandler.cs" />
-		<Compile Include="UI/MenuFactory.cs" />
-		<Compile Include="UI/ResizeHandle.cs" />
-		<Compile Include="UI/UISprites/SpriteDatabase.cs" />
-		<Compile Include="UI/UISprites/SpriteFactory.cs" />
-		<Compile Include="UI/UICore.cs" />
-		<Compile Include="UI\EmptyGraphic.cs" />
-		<Compile Include="UI\NonRaycastButton.cs" />
+		<Compile Include="UI\Utilities\DragHandler.cs" />
+		<Compile Include="UI\Factory\MenuFactory.cs" />
+		<Compile Include="UI\Utilities\ResizeHandle.cs" />
+		<Compile Include="UI\Sprites\SpriteDatabase.cs" />
+		<Compile Include="UI\Sprites\SpriteFactory.cs" />
+		<Compile Include="UI\Foundation\UICore.cs" />
+		<Compile Include="UI\Utilities\EmptyGraphic.cs" />
+		<Compile Include="UI\Utilities\NonRaycastButton.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>
 
@@ -470,13 +470,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resource\Export\" />
 	  <Folder Include="Tag\" />
+	  <Folder Include="UI\Components\" />
+	  <Folder Include="UI\Pages\" />
+	  <Folder Include="UI\Generator\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="Build">
-		<MakeDir Directories="$(GameModsPath)" Condition="'$(TargetPath)' != ''" />
-
+		<MakeDir Directories="$(GamePath)/Mods" Condition="'$(TargetPath)' != ''" />
 		<Copy Condition="'$(TargetPath)' != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)/Mods" SkipUnchangedFiles="true" />
+
+		<ItemGroup>
+			<ExportFiles Include="Resource/Export/**/*.*" />
+		</ItemGroup>
+
+		<MakeDir Directories="$(GamePath)/UserData/Overlayer" />
+		<Copy SourceFiles="@(ExportFiles)" DestinationFiles="@(ExportFiles->'$(GamePath)/UserData/Overlayer/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 </Project>

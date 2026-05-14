@@ -1,4 +1,4 @@
-namespace Overlayer.UI;
+namespace Overlayer.UI.Utilities;
 
 public class EmptyGraphic : UnityEngine.UI.Graphic {
     protected override void OnPopulateMesh(UnityEngine.UI.VertexHelper vh) => vh.Clear();

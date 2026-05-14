@@ -4,7 +4,7 @@ using Overlayer;
 using Overlayer.Async;
 using Overlayer.Localization;
 using Overlayer.Resource;
-using Overlayer.UI;
+using Overlayer.UI.Foundation;
 using Overlayer.UI.UISprites;
 using System.Collections;
 using System.Reflection;
@@ -45,9 +45,12 @@ public class Core : MelonMod {
     public override void OnInitializeMelon() {
         Logger = LoggerInstance;
         Lang = new Translator();
+        Lang.SetLog(TranslatorLogLinker);
         _ = Lang.Load(Path.Combine(OverlayerPath, "Lang"));
         Initalize();
     }
+
+    public void TranslatorLogLinker(string log) => Logger.Msg(log);
 
     public void Initalize() => MelonCoroutines.Start(CreateOverlayerObject());
 

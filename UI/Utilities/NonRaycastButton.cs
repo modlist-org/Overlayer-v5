@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace Overlayer.UI;
+namespace Overlayer.UI.Utilities;
 
 public class NonRaycastButton : MonoBehaviour, IPointerClickHandler {
     public UnityAction onClick;
