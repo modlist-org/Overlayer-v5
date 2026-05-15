@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using Overlayer.UI.Factory;
-using Overlayer.UI.UISprites;
-using Overlayer.UI.Utilities;
+using Overlayer.UI.SpriteManage;
+using Overlayer.UI.Utility;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;

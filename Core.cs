@@ -5,7 +5,7 @@ using Overlayer.Async;
 using Overlayer.Localization;
 using Overlayer.Resource;
 using Overlayer.UI;
-using Overlayer.UI.UISprites;
+using Overlayer.UI.SpriteManage;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;

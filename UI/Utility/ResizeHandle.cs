@@ -1,4 +1,4 @@
-﻿using Overlayer.UI.UISprites;
+﻿using Overlayer.UI.SpriteManage;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
