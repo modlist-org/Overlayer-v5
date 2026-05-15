@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
+namespace Overlayer.UI.Utility;
+
 public class DragHandler : MonoBehaviour, IDragHandler, IPointerDownHandler {
     private RectTransform rect;
     private Canvas canvas;

@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
-using Overlayer;
 using Overlayer.Resource;
-using Overlayer.UI.UISprites;
+using Overlayer.UI.SpriteManage;
+using Overlayer.UI.Transition;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,10 +10,7 @@ using UnityEngine.UI;
 namespace Overlayer.UI.Factory;
 
 public static class MenuFactory {
-    public static MenuState CurrentState = MenuState.Overlayer;
     public static Action<MenuState> OnStateChanged;
-
-    private static Sequence pageSeq;
 
     private class MenuItem {
         public MenuState state;
@@ -39,7 +36,7 @@ public static class MenuFactory {
         CreateItem(parent, "Docs", SpriteDatabase.Get(UISprite.Book128), MenuState.Docs);
         CreateItem(parent, "Credits", SpriteDatabase.Get(UISprite.Star128), MenuState.Credits);
 
-        ApplyState(CurrentState);
+        ApplyState(UICore.CurrentMenuState);
     }
 
     private static void CreateItem(Transform parent, string name, Sprite icon, MenuState state) {
@@ -107,7 +104,7 @@ public static class MenuFactory {
         }
 
         Add(EventTriggerType.PointerEnter, () => {
-            if(CurrentState != state) {
+            if(UICore.CurrentMenuState != state) {
                 menuItem.hoverSeq?.Kill();
                 menuItem.hoverSeq = DOTween.Sequence()
                     .Append(bg.DOColor(hoverColor, 0.2f).SetEase(Ease.OutSine));
@@ -115,7 +112,7 @@ public static class MenuFactory {
         });
 
         Add(EventTriggerType.PointerExit, () => {
-            if(CurrentState != state) {
+            if(UICore.CurrentMenuState != state) {
                 menuItem.hoverSeq?.Kill();
                 menuItem.hoverSeq = DOTween.Sequence()
                     .Append(bg.DOColor(normalColor, 0.3f).SetEase(Ease.OutSine));
@@ -137,9 +134,8 @@ public static class MenuFactory {
         OnStateChanged?.Invoke(state);
 
         ApplyState(state);
-        SwitchPage(CurrentState, state);
-
-        CurrentState = state;
+        PageSwicher.SwitchPage(UICore.CurrentMenuState, state);
+        UICore.CurrentMenuState = state;
     }
 
     private static void ApplyState(MenuState state) {
@@ -158,219 +154,5 @@ public static class MenuFactory {
             it.bg.DOKill();
             it.bg.color = target;
         }
-    }
-
-    public static RectTransform CreatePages(GameObject panel) {
-        GameObject pagesContainer = new("PagesContainer");
-        pagesContainer.transform.SetParent(panel.transform, false);
-
-        RectTransform container = pagesContainer.AddComponent<RectTransform>();
-        container.anchorMin = new Vector2(0, 0);
-        container.anchorMax = new Vector2(1, 1);
-        container.pivot = new Vector2(0.5f, 0.5f);
-
-        container.offsetMin = Vector2.zero;
-        container.offsetMax = new Vector2(0, -60);
-
-        for(int i = 0; i < Enum.GetValues(typeof(MenuState)).Length; i++) {
-            MenuState type = (MenuState)i;
-
-            GameObject obj = new($"Page{type}");
-            obj.transform.SetParent(pagesContainer.transform, false);
-
-            RectTransform rt = obj.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.pivot = new Vector2(0.5f, 0.5f);
-
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            CanvasGroup cg = obj.AddComponent<CanvasGroup>();
-            cg.alpha = 0f;
-            cg.interactable = false;
-            cg.blocksRaycasts = false;
-
-            UICore.Pages[type] = rt;
-        }
-
-        UICore.Pages[CurrentState].GetComponent<CanvasGroup>().alpha = 1f;
-        UICore.Pages[CurrentState].GetComponent<CanvasGroup>().interactable = true;
-        UICore.Pages[CurrentState].GetComponent<CanvasGroup>().blocksRaycasts = true;
-
-        {
-            var parent = UICore.Pages[MenuState.Credits];
-
-            {
-                GameObject obj = new("Logo");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(200, 200);
-                rect.anchoredPosition = new Vector2(0, 150);
-
-                var img = obj.AddComponent<Image>();
-                img.sprite = SpriteDatabase.Get(UISprite.OV5LogoOutline256);
-                img.preserveAspect = true;
-            }
-
-            {
-                GameObject obj = new("Title");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(800, 60);
-                rect.anchoredPosition = new Vector2(0, -10);
-
-                var tmp = obj.AddComponent<TextMeshProUGUI>();
-                tmp.text = "Overlayer V5";
-                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-                tmp.fontSize = 38;
-                tmp.color = Color.white;
-                tmp.alignment = TextAlignmentOptions.Center;
-            }
-
-            {
-                GameObject obj = new("Subtitle");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(800, 40);
-                rect.anchoredPosition = new Vector2(0, -60);
-
-                var tmp = obj.AddComponent<TextMeshProUGUI>();
-                tmp.text = "Display everything as you wish.";
-                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-                tmp.fontSize = 20;
-                tmp.color = new Color(1f, 1f, 1f, 0.45f);
-                tmp.alignment = TextAlignmentOptions.Center;
-            }
-
-            {
-                GameObject obj = new("Credits");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(900, 220);
-                rect.anchoredPosition = new Vector2(0, -180);
-
-                var tmp = obj.AddComponent<TextMeshProUGUI>();
-                tmp.text =
-                    "<color=#FFFFFF66>from modlist.org</color>\n" +
-                    "<color=#FFFFFF88>Thank you for using Overlayer.</color>\n" +
-                    "<size=12><color=#FFFFFF33>\nLicensed under GPLv3</color></size>";
-                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-                tmp.fontSize = 26;
-                tmp.color = Color.white;
-                tmp.lineSpacing = 18;
-                tmp.alignment = TextAlignmentOptions.Center;
-            }
-        }
-
-        {
-            var parent = UICore.Pages[MenuState.Settings];
-            var languages = Core.Lang.GetLanguages();
-            var nativeNames = Core.Lang.GetLanguageNativeNames();
-
-            {
-                GameObject obj = new("LanguageLabel");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(200, 50);
-                rect.anchoredPosition = new Vector2(-150, 100);
-
-                var tmp = obj.AddComponent<TextMeshProUGUI>();
-                tmp.text = Core.Lang.Get("L_SETTING_LANGUAGE", "Language");
-                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-                tmp.fontSize = 24;
-                tmp.color = Color.white;
-                tmp.alignment = TextAlignmentOptions.Left;
-            }
-
-            {
-                GameObject obj = new("LanguageSelector");
-                obj.transform.SetParent(parent, false);
-
-                var rect = obj.AddComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(300, 50);
-                rect.anchoredPosition = new Vector2(100, 100);
-
-                var tmp = obj.AddComponent<TextMeshProUGUI>();
-
-                string currentNative = Core.Lang.GetForLanguage("0NATIVELANG", Core.Lang.Language, Core.Lang.Language);
-                tmp.text = $"< {currentNative} >";
-
-                tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-                tmp.fontSize = 24;
-                tmp.color = new Color(1f, 1f, 1f, 0.8f);
-                tmp.alignment = TextAlignmentOptions.Center;
-
-                var btn = obj.AddComponent<Button>();
-                btn.onClick.AddListener(() => {
-                    int currentIndex = Array.IndexOf(languages, Core.Lang.Language);
-                    int nextIndex = (currentIndex + 1) % languages.Length;
-
-                    Core.Lang.Language = languages[nextIndex];
-
-                    tmp.text = $"< {nativeNames[nextIndex]} >";
-                });
-            }
-        }
-
-        return container;
-    }
-
-    private static void SwitchPage(MenuState from, MenuState to) {
-        if(from == to) {
-            return;
-        }
-
-        pageSeq?.Kill(true);
-
-        RectTransform fromPage = UICore.Pages[from];
-        RectTransform toPage = UICore.Pages[to];
-
-        CanvasGroup fromCg = fromPage.GetComponent<CanvasGroup>();
-        CanvasGroup toCg = toPage.GetComponent<CanvasGroup>();
-
-        toPage.anchoredPosition = new Vector2(600, 0);
-        toCg.alpha = 0f;
-        toCg.interactable = false;
-        toCg.blocksRaycasts = false;
-
-        pageSeq = DOTween.Sequence();
-
-        pageSeq.Join(fromPage.DOAnchorPosX(-420f, 0.35f).SetEase(Ease.OutCubic));
-        pageSeq.Join(fromCg.DOFade(0f, 0.3f));
-
-        pageSeq.Join(toPage.DOAnchorPosX(0f, 0.45f).SetEase(Ease.OutExpo).SetDelay(0.05f));
-        pageSeq.Join(toCg.DOFade(1f, 0.3f));
-
-        pageSeq.OnComplete(() => {
-            fromCg.interactable = false;
-            fromCg.blocksRaycasts = false;
-
-            toCg.interactable = true;
-            toCg.blocksRaycasts = true;
-        });
     }
 }

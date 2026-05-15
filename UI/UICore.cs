@@ -22,6 +22,7 @@ internal static class UICore {
     internal static CanvasScaler CanvasScaler;
 
     internal static readonly Dictionary<MenuState, RectTransform> Pages = [];
+    public static MenuState CurrentMenuState = MenuState.Overlayer;
 
     public static void Initialize() {
         canvasObj = new GameObject("OverlayerUICanvas");
@@ -105,7 +106,7 @@ internal static class UICore {
             var mask = menuPanel.AddComponent<Mask>();
             mask.showMaskGraphic = false;
 
-            Page = MenuFactory.CreatePages(menuPanel);
+            Page = PageFactory.CreatePages(menuPanel);
 
             // Menu
             GameObject menu = new("Menu");

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Overlayer.UI.Utilities;
+namespace Overlayer.UI.Utility;
 
 public enum ResizeHandleType {
     Top,

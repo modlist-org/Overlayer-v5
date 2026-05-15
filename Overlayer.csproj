@@ -440,14 +440,18 @@
 		<Compile Include="Overlay\Overlay.cs" />
 		<Compile Include="Resource/ResourceLoader.cs" />
 		<Compile Include="Resource/ResourceManager.cs" />
-		<Compile Include="UI\Utilities\DragHandler.cs" />
+		<Compile Include="UI\Factory\PageFactory.cs" />
+		<Compile Include="UI\Factory\Page\PageCredits.cs" />
+		<Compile Include="UI\Factory\Page\PageSettings.cs" />
+		<Compile Include="UI\Transition\PageSwicher.cs" />
+		<Compile Include="UI\Utility\DragHandler.cs" />
 		<Compile Include="UI\Factory\MenuFactory.cs" />
-		<Compile Include="UI\Utilities\ResizeHandle.cs" />
-		<Compile Include="UI\Sprites\SpriteDatabase.cs" />
-		<Compile Include="UI\Sprites\SpriteFactory.cs" />
+		<Compile Include="UI\Utility\ResizeHandle.cs" />
+		<Compile Include="UI\SpriteManage\SpriteDatabase.cs" />
+		<Compile Include="UI\SpriteManage\SpriteFactory.cs" />
 		<Compile Include="UI\UICore.cs" />
-		<Compile Include="UI\Utilities\EmptyGraphic.cs" />
-		<Compile Include="UI\Utilities\NonRaycastButton.cs" />
+		<Compile Include="UI\Utility\EmptyGraphic.cs" />
+		<Compile Include="UI\Utility\NonRaycastButton.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>
 
@@ -472,7 +476,6 @@
 	<ItemGroup>
 	  <Folder Include="Tag\" />
 	  <Folder Include="UI\Components\" />
-	  <Folder Include="UI\Pages\" />
 	  <Folder Include="UI\Generator\" />
 	</ItemGroup>
 

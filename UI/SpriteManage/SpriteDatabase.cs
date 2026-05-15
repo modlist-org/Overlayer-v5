@@ -1,7 +1,7 @@
 ﻿using Overlayer.Resource;
 using UnityEngine;
 
-namespace Overlayer.UI.UISprites;
+namespace Overlayer.UI.SpriteManage;
 
 public enum UISprite {
     OV5LogoOutline256,

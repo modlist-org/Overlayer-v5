@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Overlayer.UI.UISprites;
+namespace Overlayer.UI.SpriteManage;
 
 public static class SpriteFactory {
     public static Sprite Create(Texture2D tex) {
