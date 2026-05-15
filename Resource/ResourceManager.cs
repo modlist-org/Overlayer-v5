@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Overlayer.Resource;
 
@@ -74,5 +75,14 @@ internal static class ResourceManager {
         Texture2D texture = new(2, 2);
         texture.LoadImage(data);
         return texture;
+    }
+
+    public static void Dispose() {
+        foreach(var item in cache.Values) {
+            if(item is Texture2D tex) {
+                Object.Destroy(tex);
+            }
+        }
+        cache.Clear();
     }
 }

@@ -269,6 +269,10 @@ internal static class UICore {
     );
 
     public static void HandleUpdate() {
+        if(canvasObj == null) {
+            return;
+        }
+
         bool pressed =
             Input.GetKey(KeyCode.LeftAlt)
             && Input.GetKey(KeyCode.BackQuote);
@@ -481,5 +485,10 @@ internal static class UICore {
         } else {
             OpenMenu();
         }
+    }
+
+    public static void Dispose() {
+        UnityEngine.Object.Destroy(canvasObj);
+        canvasObj = null;
     }
 }

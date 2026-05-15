@@ -2,6 +2,7 @@
 using MelonLoader.Utils;
 using Overlayer;
 using Overlayer.Async;
+using Overlayer.IO;
 using Overlayer.Localization;
 using Overlayer.Resource;
 using Overlayer.UI;
@@ -20,20 +21,28 @@ public class Core : MelonMod {
     internal static Assembly OverlayerAssembly = Assembly.GetExecutingAssembly();
     internal static MelonLogger.Instance Logger;
     internal static GameObject OverlayerObject;
-    internal static Translator Lang;
+    internal static Translator Tr;
+    public static Settings Config;
     public static readonly string OverlayerPath = Path.Combine(
         MelonEnvironment.UserDataDirectory,
         "Overlayer"
     );
 
+
+    private IEnumerator InitializeRoutine() {
+        yield return CreateOverlayerObject();
+        yield return InitializeAsync();
+    }
+
     private IEnumerator CreateOverlayerObject() {
         for(;;) {
             if(OverlayerObject == null) {
                 OverlayerObject = new GameObject("Overlayer");
-                UnityEngine.Object.DontDestroyOnLoad(OverlayerObject);
+
+                UnityEngine.Object
+                    .DontDestroyOnLoad(OverlayerObject);
 
                 if(OverlayerObject != null) {
-                    Internal_Initialize();
                     yield break;
                 }
             }
@@ -42,26 +51,50 @@ public class Core : MelonMod {
         }
     }
 
-    public override void OnInitializeMelon() {
-        Logger = LoggerInstance;
-        Lang = new Translator();
-        Lang.SetLog(TranslatorLogLinker);
-        _ = Lang.Load(Path.Combine(OverlayerPath, "Lang"));
-        Initalize();
+    private void DistroyOverlayerObject() {
+        if(OverlayerObject != null) {
+            UnityEngine.Object.Destroy(OverlayerObject);
+            OverlayerObject = null;
+        }
     }
 
-    public void TranslatorLogLinker(string log) => Logger.Msg(log);
-
-    public void Initalize() => MelonCoroutines.Start(CreateOverlayerObject());
-
-    private void Internal_Initialize() {
-        OverlayerObject.AddComponent<MainThread>();
-        ResourceManager.Initialize();
-        SpriteDatabase.Initialize();
-        UICore.Initialize();
-        LoggerInstance.Msg("Initialized.");
+    public override void OnInitializeMelon() {
+        LoggerInstance.Msg("Starting");
+        Logger = LoggerInstance;
+        Tr = new Translator();
+        Config = new Settings();
+        Tr.SetLog(TranslatorLogLinker);
+        _ = Tr.Load(Path.Combine(OverlayerPath, "Lang"));
+        Initialize();
     }
 
     public override void OnUpdate() => UICore.HandleUpdate();
 
+    public override void OnApplicationQuit() {
+        Config.Save();
+        Dispose();
+    }
+
+    public void TranslatorLogLinker(string log) => Logger.Msg(log);
+
+    public void Initialize() => MelonCoroutines.Start(InitializeRoutine());
+
+    private async Task InitializeAsync() {
+        await Task.Run(Config.Load);
+
+        OverlayerObject.AddComponent<MainThread>();
+
+        ResourceManager.Initialize();
+        SpriteDatabase.Initialize();
+        UICore.Initialize();
+
+        LoggerInstance.Msg("Ok");
+    }
+
+    public void Dispose() {
+        UICore.Dispose();
+        SpriteDatabase.Dispose();
+        ResourceManager.Dispose();
+        DistroyOverlayerObject();
+    }
 }

@@ -18,15 +18,15 @@ public class TextLocalization : MonoBehaviour {
     void Awake() => tmp = GetComponent<TMP_Text>();
 
     void OnEnable() {
-        Core.Lang.OnInitialize += UpdateText;
+        Core.Tr.OnInitialize += UpdateText;
         UpdateText();
     }
 
-    void OnDisable() => Core.Lang.OnInitialize -= UpdateText;
+    void OnDisable() => Core.Tr.OnInitialize -= UpdateText;
 
     public void UpdateText() {
         if(tmp != null && !string.IsNullOrEmpty(Key)) {
-            tmp.text = Core.Lang.Get(Key, Default);
+            tmp.text = Core.Tr.Get(Key, Default);
         }
     }
 }

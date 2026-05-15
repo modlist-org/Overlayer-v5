@@ -1,5 +1,6 @@
 ﻿using Overlayer.Resource;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Overlayer.UI.SpriteManage;
 
@@ -74,4 +75,15 @@ public static class SpriteDatabase {
 
     public static Sprite Get(UISprite key) => sprites[key];
     public static Sprite Get(UISliceSprite key) => sliceSprites[key];
+
+    public static void Dispose() {
+        foreach(var sprite in sprites.Values) {
+            Object.Destroy(sprite);
+        }
+        sprites.Clear();
+        foreach(var sprite in sliceSprites.Values) {
+            Object.Destroy(sprite);
+        }
+        sliceSprites.Clear();
+    }
 }
