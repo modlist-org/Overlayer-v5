@@ -1,11 +1,11 @@
-﻿using Overlayer.UI.Generator;
+﻿using Overlayer.IO;
+using Overlayer.UI.Generator;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Overlayer.UI.Factory.Page;
 
 internal static class PageSettings {
-    private static bool test = true;
     public static void Create(RectTransform parent) {
         GameObject pad = new("Pad");
         pad.transform.SetParent(parent, false);
@@ -53,8 +53,14 @@ internal static class PageSettings {
         scroll.viewport = viewportRect;
         scroll.content = contentRect;
 
-        GenerateUI.Toggle(content.transform, true, test, (toggle) => {
-            test = toggle;
-        }, "Test Toggle");
+        var defSet = new Settings();
+        GenerateUI.Toggle(GenerateUI.Row(content.transform), defSet.ShowOnStartup, Core.Config.ShowOnStartup, (toggle) => {
+            Core.Config.ShowOnStartup = toggle;
+            Core.Config.RequestSave();
+        }, "Show Overlayer Panel at Startup").AddToolTip("KEY", "Show Overlayer Panel at Startup");
+        GenerateUI.Toggle(GenerateUI.Row(content.transform), defSet.RightClickToDefault, Core.Config.RightClickToDefault, (toggle) => {
+            Core.Config.RightClickToDefault = toggle;
+            Core.Config.RequestSave();
+        }, "Right-click to set as default").AddToolTip("KEY", "Right-click to set as default");
     }
 }

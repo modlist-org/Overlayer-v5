@@ -6,12 +6,14 @@ public class Settings {
     public bool Active = true;
     public string Language = "en-US";
     public bool ShowOnStartup = false;
+    public bool RightClickToDefault = true;
 
     public JToken Serialize() {
         JObject obj = new() {
             [nameof(Active)] = Active,
             [nameof(Language)] = Language,
-            [nameof(ShowOnStartup)] = ShowOnStartup
+            [nameof(ShowOnStartup)] = ShowOnStartup,
+            [nameof(RightClickToDefault)] = RightClickToDefault
         };
 
         return obj;
@@ -23,6 +25,7 @@ public class Settings {
         Active = token.Value<bool?>(nameof(Active)) ?? defaults.Active;
         Language = token.Value<string>(nameof(Language)) ?? defaults.Language;
         ShowOnStartup = token.Value<bool?>(nameof(ShowOnStartup)) ?? defaults.ShowOnStartup;
+        RightClickToDefault = token.Value<bool?>(nameof(RightClickToDefault)) ?? defaults.RightClickToDefault;
     }
 
     public static readonly string Path = System.IO.Path.Combine(Core.OverlayerPath, $"{nameof(Settings)}.json");
@@ -39,12 +42,42 @@ public class Settings {
         }
     }
 
+    private static readonly object saveLock = new();
+    private CancellationTokenSource saveCts;
+    private bool saveScheduled;
+
     public void Save() {
-        try {
+        lock(saveLock) {
             string json = Serialize().ToString();
             File.WriteAllText(Path, json);
-        } catch(Exception e) {
-            Core.Logger.Error($"Failed to save settings: {e}");
         }
+    }
+
+    public void RequestSave() {
+        if(saveScheduled) {
+            return;
+        }
+
+        saveScheduled = true;
+
+        saveCts?.Cancel();
+        saveCts = new CancellationTokenSource();
+        var token = saveCts.Token;
+
+        _ = Task.Run(async () => {
+            try {
+                await Task.Delay(500, token);
+
+                if(token.IsCancellationRequested) {
+                    return;
+                }
+
+                Save();
+            } catch(Exception e) {
+                Core.Logger.Error(e.ToString());
+            } finally {
+                saveScheduled = false;
+            }
+        });
     }
 }

@@ -41,6 +41,7 @@ internal static class UICore {
 
         CreatePanel();
         ResizeHandle.CreateResizeHandles(Panel);
+        Tooltip.Initialize(canvasObj.transform);
     }
 
     public static RectTransform Panel;
@@ -59,7 +60,7 @@ internal static class UICore {
             var image = panel.AddComponent<Image>();
             image.color = new Color(0.165f, 0.161f, 0.196f, 1f);
             image.type = Image.Type.Sliced;
-            image.sprite = SpriteDatabase.Get(UISliceSprite.Circle256);
+            image.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P1024);
         }
 
         Panel = panel.GetComponent<RectTransform>();
@@ -100,7 +101,7 @@ internal static class UICore {
             var maskImage = menuPanel.AddComponent<Image>();
             maskImage.color = Color.white;
             maskImage.type = Image.Type.Sliced;
-            maskImage.sprite = SpriteDatabase.Get(UISliceSprite.Circle256);
+            maskImage.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P1024);
             maskImage.raycastTarget = false;
 
             var mask = menuPanel.AddComponent<Mask>();
@@ -161,7 +162,7 @@ internal static class UICore {
         var topImage = topBar.AddComponent<Image>();
         topImage.color = new Color(0.255f, 0.259f, 0.333f, 1f);
         topImage.type = Image.Type.Sliced;
-        topImage.sprite = SpriteDatabase.Get(UISliceSprite.CircleHalf256);
+        topImage.sprite = SpriteDatabase.Get(UISliceSprite.CircleHalf256P1024);
 
         var topRect = topBar.GetComponent<RectTransform>();
         topRect.anchorMin = new(0, 1);
@@ -298,6 +299,8 @@ internal static class UICore {
         if(Input.GetKeyUp(KeyCode.BackQuote)) {
             holdingToggle = false;
         }
+
+        Tooltip.Tick();
     }
 
     private static Vector2 GetRandomOffscreenPosition() {
@@ -488,6 +491,7 @@ internal static class UICore {
     }
 
     public static void Dispose() {
+        Tooltip.Dispose();
         UnityEngine.Object.Destroy(canvasObj);
         canvasObj = null;
     }

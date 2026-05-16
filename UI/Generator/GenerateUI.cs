@@ -9,16 +9,29 @@ using UnityEngine.UI;
 namespace Overlayer.UI.Generator;
 
 public static class GenerateUI {
+    public static RectTransform Row(Transform parent, float height = 50f) {
+        GameObject obj = new("Row");
+        obj.transform.SetParent(parent, false);
+
+        RectTransform rect = obj.AddComponent<RectTransform>();
+        rect.anchorMin = new(0f, 1f);
+        rect.anchorMax = new(1f, 1f);
+        rect.pivot = new(0.5f, 1f);
+        rect.offsetMin = new(0f, -height);
+        rect.offsetMax = Vector2.zero;
+
+        return rect;
+    }
+
     public static RectTransform Toggle(Transform parent, bool defaultValue, bool value, Action<bool> onChanged, string text) {
         RectTransform rect = BackGround();
-
         rect.SetParent(parent, false);
 
         TextMeshProUGUI tmp = AddText(rect);
         tmp.text = text;
 
         GameObject change = AddSmallChangedCircle(rect);
-        change.SetActive(defaultValue != value);
+        var changeImg = change.GetComponent<Image>();
 
         GameObject toggleCircle = new("ToggleCircle");
         toggleCircle.transform.SetParent(rect, false);
@@ -26,55 +39,127 @@ public static class GenerateUI {
         RectTransform circleRect = toggleCircle.AddComponent<RectTransform>();
         circleRect.anchorMin = new(1f, 0.5f);
         circleRect.anchorMax = new(1f, 0.5f);
-        circleRect.pivot = new(1f, 0.5f);
-
-        circleRect.anchoredPosition = new(-10f, 0f);
+        circleRect.pivot = new(0.5f, 0.5f);
+        circleRect.anchoredPosition = new(-23f, 0f);
         circleRect.sizeDelta = new(26f, 26f);
+
         Image circleImage = toggleCircle.AddComponent<Image>();
+
+        Sequence circleSeq = null;
+        Sequence changeSeq = null;
 
         void UpdateVisual() {
             circleImage.sprite = SpriteDatabase.Get(
                 value ? UISprite.Circle256 : UISprite.ToggleCircle128
             );
-            circleImage.color = value ? new(0.569f, 0.604f, 1f, 1f) : new(0.384f, 0.4f, 0.588f, 1f);
-            change.SetActive(value != defaultValue);
+
+            circleSeq?.Kill();
+            circleRect.sizeDelta = new(30f, 30f);
+            circleSeq = DOTween.Sequence()
+                .Join(
+                    DOTween.To(
+                        () => circleRect.sizeDelta.x,
+                        x => circleRect.sizeDelta = new(x, x),
+                        26f,
+                        0.3f
+                    ).SetEase(Ease.OutQuad)
+                )
+                .Join(
+                    circleImage.DOColor(
+                        value
+                            ? new(0.569f, 0.604f, 1f, 1f)
+                            : new(0.384f, 0.4f, 0.588f, 1f),
+                        0.15f
+                    ).SetEase(Ease.OutQuad)
+                );
+            changeSeq?.Kill();
+
+            float target = defaultValue != value ? 1f : 0f;
+            changeSeq = DOTween.Sequence().Append(
+                DOTween.To(
+                    () => changeImg.color.a,
+                    x => {
+                        Color c = changeImg.color;
+                        c.a = x;
+                        changeImg.color = c;
+                    },
+                    target,
+                    0.2f
+                ).SetEase(Ease.OutSine)
+            );
         }
 
         UpdateVisual();
 
-        AddButton(rect.gameObject, () => {
-            value = !value;
-            UpdateVisual();
-            onChanged?.Invoke(value);
+        AddButton(rect.gameObject, (isRight) => {
+            if(isRight) {
+                if(Core.Config.RightClickToDefault && value != defaultValue) {
+                    value = defaultValue;
+                    UpdateVisual();
+                    onChanged?.Invoke(value);
+                }
+            } else {
+                value = !value;
+                UpdateVisual();
+                onChanged?.Invoke(value);
+            }
         });
 
         return rect;
     }
 
-    private static RectTransform BackGround() {
-        GameObject obj = new("Bg");
+    public static void AddEvent(EventTriggerType type, Action<PointerEventData> cb, EventTrigger trigger) {
+        var entry = new EventTrigger.Entry { eventID = type };
+        entry.callback.AddListener(e => cb((PointerEventData)e));
+        trigger.triggers.Add(entry);
+    }
 
+    public enum BackGroundType {
+        Main,
+        Sub,
+        Full
+    }
+
+    public static RectTransform BackGround(BackGroundType type = BackGroundType.Main) {
+        GameObject obj = new("Bg");
         RectTransform rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(0f, 1f);
-        rect.pivot = new Vector2(0f, 1f);
-        rect.sizeDelta = new Vector2(630f, 50f);
+        rect.anchorMin = new(0f, 0f);
+        rect.anchorMax = new(1f, 1f);
+        rect.pivot = new(0.5f, 0.5f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        switch(type) {
+            case BackGroundType.Main: {
+                rect.offsetMax = new(-300f, 0f);
+                break;
+            }
+
+            case BackGroundType.Sub: {
+                rect.anchorMin = new(1f, 0f);
+                rect.sizeDelta = new(290f, 0f);
+                rect.offsetMax = new(-10f, 0f);
+                break;
+            }
+
+            case BackGroundType.Full: {
+                rect.pivot = new(0.5f, 0.5f);
+                break;
+            }
+        }
 
         Image img = obj.AddComponent<Image>();
         img.color = new(0.235f, 0.227f, 0.294f, 1f);
-        img.sprite = SpriteDatabase.Get(UISliceSprite.Circle256);
+        img.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P2048);
         img.type = Image.Type.Sliced;
 
         return rect;
     }
 
-    private static void AddButton(GameObject obj, Action onClick) {
-        Button btn = obj.AddComponent<Button>();
-        btn.transition = Selectable.Transition.None;
+    public static void AddButton(GameObject obj, Action<bool> onClick) {
+        EventTrigger trigger = obj.AddComponent<EventTrigger>();
 
-        btn.onClick.AddListener(() => {
-            onClick?.Invoke();
-        });
+        Sequence hoverSeq = null;
 
         GameObject hover = new("Hover");
         hover.transform.SetParent(obj.transform, false);
@@ -88,27 +173,16 @@ public static class GenerateUI {
         hoverRect.offsetMax = Vector2.zero;
 
         Image hoverImage = hover.AddComponent<Image>();
-        hoverImage.sprite = SpriteDatabase.Get(UISliceSprite.CircleOutline256);
+        hoverImage.sprite = SpriteDatabase.Get(UISliceSprite.CircleOutline256P2048);
         hoverImage.type = Image.Type.Sliced;
         hoverImage.color = new(0.569f, 0.604f, 1f, 0f);
 
-        EventTrigger trigger = obj.AddComponent<EventTrigger>();
+        AddEvent(EventTriggerType.PointerClick, (e) => {
+            bool isRight = e.button == PointerEventData.InputButton.Right;
+            onClick?.Invoke(isRight);
+        }, trigger);
 
-        Sequence hoverSeq = null;
-
-        void Add(EventTriggerType type, Action callback) {
-            var entry = new EventTrigger.Entry {
-                eventID = type
-            };
-
-            entry.callback.AddListener(_ => {
-                callback();
-            });
-
-            trigger.triggers.Add(entry);
-        }
-
-        Add(EventTriggerType.PointerEnter, () => {
+        AddEvent(EventTriggerType.PointerEnter, (e) => {
             hoverSeq?.Kill();
 
             hoverSeq = DOTween.Sequence().Append(
@@ -123,9 +197,9 @@ public static class GenerateUI {
                     0.1f
                 ).SetEase(Ease.OutSine)
             );
-        });
+        }, trigger);
 
-        Add(EventTriggerType.PointerExit, () => {
+        AddEvent(EventTriggerType.PointerExit, (e) => {
             hoverSeq?.Kill();
 
             hoverSeq = DOTween.Sequence().Append(
@@ -140,21 +214,27 @@ public static class GenerateUI {
                     0.1f
                 ).SetEase(Ease.OutSine)
             );
-        });
+        }, trigger);
     }
 
-    private static TextMeshProUGUI AddText(RectTransform parent) {
+    public static TextMeshProUGUI AddText(RectTransform parent) => CreateText(parent, 24f, FontStyles.Normal);
+
+    public static TextMeshProUGUI AddTextH1(RectTransform parent) => CreateText(parent, 32f, FontStyles.Bold);
+
+    private static TextMeshProUGUI CreateText(RectTransform parent, float size, FontStyles style) {
         GameObject obj = new("Text");
         obj.transform.SetParent(parent, false);
+
         RectTransform rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.offsetMin = new Vector2(16f, 0f);
+        rect.anchorMin = new(0f, 0f);
+        rect.anchorMax = new(1f, 1f);
+        rect.offsetMin = new(16f, 0f);
         rect.offsetMax = Vector2.zero;
 
         TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
         tmp.font = ResourceManager.Get<TMP_FontAsset>(Asset.SUITRegular);
-        tmp.fontSize = 24f;
+        tmp.fontSize = size;
+        tmp.fontStyle = style;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.Left;
         tmp.verticalAlignment = VerticalAlignmentOptions.Middle;
@@ -162,7 +242,7 @@ public static class GenerateUI {
         return tmp;
     }
 
-    private static GameObject AddSmallChangedCircle(RectTransform parent) {
+    public static GameObject AddSmallChangedCircle(RectTransform parent) {
         GameObject obj = new("Changed");
         obj.transform.SetParent(parent, false);
 
@@ -175,8 +255,25 @@ public static class GenerateUI {
 
         Image img = obj.AddComponent<Image>();
         img.sprite = SpriteDatabase.Get(UISprite.Circle256);
-        img.color = new Color(0.325f, 0.341f, 0.514f,1f);
+        img.color = new Color(0.396f, 0.416f, 0.651f, 1f);
 
         return obj;
+    }
+
+    public static Transform AddToolTip(this Transform parent, string key, string def) {
+        EventTrigger trigger = parent.gameObject.GetComponent<EventTrigger>();
+        if(trigger == null) {
+            trigger = parent.gameObject.AddComponent<EventTrigger>();
+        }
+
+        AddEvent(EventTriggerType.PointerEnter, (e) => {
+            Tooltip.Show(Core.Tr.Get(key, def));
+        }, trigger);
+
+        AddEvent(EventTriggerType.PointerExit, (e) => {
+            Tooltip.Hide();
+        }, trigger);
+
+        return parent;
     }
 }

@@ -18,9 +18,11 @@ public enum UISprite {
 }
 
 public enum UISliceSprite {
-    Circle256,
-    CircleHalf256,
-    CircleOutline256,
+    Circle256P1024,
+    Circle256P2048,
+    CircleHalf256P1024,
+    CircleOutline256P1024,
+    CircleOutline256P2048,
 }
 
 public static class SpriteDatabase {
@@ -73,14 +75,20 @@ public static class SpriteDatabase {
         sprites[UISprite.ToggleCircle128] =
             SpriteFactory.Create(toggleCircle);
 
-        sliceSprites[UISliceSprite.Circle256] =
+        sliceSprites[UISliceSprite.Circle256P1024] =
             SpriteFactory.CreateSliced(circle, 1024f, border);
 
-        sliceSprites[UISliceSprite.CircleHalf256] =
+        sliceSprites[UISliceSprite.Circle256P2048] =
+            SpriteFactory.CreateSliced(circle, 2048f, border);
+
+        sliceSprites[UISliceSprite.CircleHalf256P1024] =
             SpriteFactory.CreateSliced(half, 1024f, border);
 
-        sliceSprites[UISliceSprite.CircleOutline256] =
+        sliceSprites[UISliceSprite.CircleOutline256P1024] =
             SpriteFactory.CreateSliced(circleOutline, 1024f, border);
+
+        sliceSprites[UISliceSprite.CircleOutline256P2048] =
+            SpriteFactory.CreateSliced(circleOutline, 2048f, border);
     }
 
     public static Sprite Get(UISprite key) => sprites[key];

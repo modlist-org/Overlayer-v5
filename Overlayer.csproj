@@ -443,6 +443,7 @@
 		<Compile Include="Overlay\Overlay.cs" />
 		<Compile Include="Resource/ResourceLoader.cs" />
 		<Compile Include="Resource/ResourceManager.cs" />
+		<Compile Include="UI\Tooltip.cs" />
 		<Compile Include="UI\Factory\PageFactory.cs" />
 		<Compile Include="UI\Factory\Page\PageCredits.cs" />
 		<Compile Include="UI\Factory\Page\PageSettings.cs" />
