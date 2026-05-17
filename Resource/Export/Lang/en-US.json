@@ -5,14 +5,17 @@
     "0TRANSLATORS": [
       "OVERLAYER"
     ],
-    "SETTINGS": "Settings",
-    "DOCS": "Docs",
+    "ADOFAI": "ADOFAI",
     "CREDITS": "Credits",
+    "DESC_MIDDLE_CLICK_TO_SET_AS_DEFAULT": "Setting that restores an item to its default value when you middle-click on it.\nYou can identify it by a small dot at the top-left of the item",
+    "DESC_SHOW_AUTOPLAY_JUDGMENT": "Applies a patch to show the true judgment in AutoPlay on the Hit Error Meter",
+    "DOCS": "Docs",
     "LANGUAGE": "Language",
+    "MIDDLE_CLICK_TO_SET_AS_DEFAULT": "Middle-click to set as default",
     "RELOAD": "Reload",
     "RELOADING": "Reloading...",
-    "SHOW_OVERLAYER_PANEL_AT_STARTUP": "Show Overlayer Panel at Startup",
-    "MIDDLE_CLICK_TO_SET_AS_DEFAULT": "Middle-click to set as default",
-    "DESC_MIDDLECLICKTODEFAULT": "Setting that restores an item to its default value when you middle-click on it.\nYou can identify it by a small dot at the top-left of the item."
+    "SETTINGS": "Settings",
+    "SHOW_AUTOPLAY_JUDGMENT": "Show Autoplay Judgment",
+    "SHOW_OVERLAYER_PANEL_AT_STARTUP": "Show Overlayer Panel at Startup"
   }
 }

@@ -4,6 +4,7 @@ using Overlayer;
 using Overlayer.Async;
 using Overlayer.IO;
 using Overlayer.Localization;
+using Overlayer.Patch.Safe;
 using Overlayer.Resource;
 using Overlayer.UI;
 using Overlayer.UI.SpriteManage;
@@ -86,6 +87,9 @@ public class Core : MelonMod {
 
         ResourceManager.Initialize();
         SpriteDatabase.Initialize();
+
+        SafePatchController.ApplyAll();
+
         UICore.Initialize();
 
         LoggerInstance.Msg("Ok");
@@ -93,8 +97,12 @@ public class Core : MelonMod {
 
     public void Dispose() {
         UICore.Dispose();
+
+        SafePatchController.UnloadAll();
+
         SpriteDatabase.Dispose();
         ResourceManager.Dispose();
+
         DistroyOverlayerObject();
     }
 }

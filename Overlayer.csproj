@@ -430,6 +430,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="ADOFAI\Patch\SP_ShowAutoJudgment.cs" />
 		<Compile Include="Core.cs" />
 		<Compile Include="Info.cs" />
 		<Compile Include="IO\Settings.cs" />
@@ -437,6 +438,11 @@
 		<Compile Include="Localization\Translator.cs" />
 		<Compile Include="Async\MainThread.cs" />
 		<Compile Include="Overlay\Overlay.cs" />
+		<Compile Include="Patch\Safe\SafeConditionalPatch.cs" />
+		<Compile Include="Patch\Safe\SafePatch.cs" />
+		<Compile Include="Patch\Safe\SafePatchAttribute.cs" />
+		<Compile Include="Patch\Safe\SafePatchController.cs" />
+		<Compile Include="Patch\Safe\SafePatchManager.cs" />
 		<Compile Include="Resource/ResourceLoader.cs" />
 		<Compile Include="Resource/ResourceManager.cs" />
 		<Compile Include="UI\Objects\Impl\UIButton.cs" />

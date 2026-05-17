@@ -1,6 +1,7 @@
 ﻿using Overlayer.Async;
 using Overlayer.IO;
 using Overlayer.Localization;
+using Overlayer.Patch.Safe;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Objects;
 using Overlayer.UI.Objects.Impl;
@@ -161,10 +162,40 @@ internal static class PageSettings {
         );
         middleClickToggle.Text.gameObject.AddComponent<TextLocalization>().Init("MIDDLE_CLICK_TO_SET_AS_DEFAULT", "Middle-click to set as default");
         middleClickToggle.Rect.AddToolTip(
-            "DESC_MIDDLECLICKTODEFAULT",
-            "Setting that restores an item to its default value when you middle-click on it.\nYou can identify it by a small dot at the top-left of the item."
+            "DESC_MIDDLE_CLICK_TO_SET_AS_DEFAULT",
+            "Setting that restores an item to its default value when you middle-click on it.\nYou can identify it by a small dot at the top-left of the item"
         );
         objects[middleClickToggle.Id] = middleClickToggle;
+
+        _ = GenerateUI.AddTextH1(GenerateUI.Row(content.transform))
+           .gameObject.AddComponent<TextLocalization>()
+           .Init("ADOFAI", "ADOFAI");
+
+
+        var sp_saj = SafePatchController.Get<SP_ShowAutoJudgment>();
+        UIToggle showAutoJudgmentToggle = GenerateUI.Toggle(
+            GenerateUI.Row(content.transform),
+            defSet.ShowAutoplayJudgment,
+            Core.Config.ShowAutoplayJudgment,
+            toggle => {
+                Core.Config.ShowAutoplayJudgment = toggle;
+                Core.Config.RequestSave();
+                if(toggle) {
+                    sp_saj.Apply();
+                } else {
+                    sp_saj.Remove();
+                }
+            },
+            "Show Autoplay Judgment",
+            "show_autoplay_judgment"
+        );
+        showAutoJudgmentToggle.Text.gameObject.AddComponent<TextLocalization>().Init("SHOW_AUTOPLAY_JUDGMENT", "Show Autoplay Judgment");
+        objects[showAutoJudgmentToggle.Id] = showAutoJudgmentToggle;
+
+        showAutoJudgmentToggle.Rect.AddToolTip(
+            "DESC_SHOW_AUTOPLAY_JUDGMENT",
+            "Applies a patch to show the true judgment in AutoPlay on the Hit Error Meter"
+        );
 
     }
 

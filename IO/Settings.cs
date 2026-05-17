@@ -8,12 +8,16 @@ public class Settings {
     public bool ShowOnStartup = false;
     public bool MiddleClickToDefault = true;
 
+    public bool ShowAutoplayJudgment = false;
+
     public JToken Serialize() {
         JObject obj = new() {
             [nameof(Active)] = Active,
             [nameof(Language)] = Language,
             [nameof(ShowOnStartup)] = ShowOnStartup,
-            [nameof(MiddleClickToDefault)] = MiddleClickToDefault
+            [nameof(MiddleClickToDefault)] = MiddleClickToDefault,
+
+            [nameof(ShowAutoplayJudgment)] = ShowAutoplayJudgment
         };
 
         return obj;
@@ -26,6 +30,8 @@ public class Settings {
         Language = token.Value<string>(nameof(Language)) ?? defaults.Language;
         ShowOnStartup = token.Value<bool?>(nameof(ShowOnStartup)) ?? defaults.ShowOnStartup;
         MiddleClickToDefault = token.Value<bool?>(nameof(MiddleClickToDefault)) ?? defaults.MiddleClickToDefault;
+
+        ShowAutoplayJudgment = token.Value<bool?>(nameof(ShowAutoplayJudgment)) ?? defaults.ShowAutoplayJudgment;
     }
 
     public static readonly string Path = System.IO.Path.Combine(Core.OverlayerPath, $"{nameof(Settings)}.json");
