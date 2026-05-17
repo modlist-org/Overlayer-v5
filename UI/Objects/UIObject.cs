@@ -7,22 +7,37 @@ public abstract class UIObject {
     public string Id { get; }
     public RectTransform Rect { get; }
 
-    public bool onlyModOn;
+    private bool _onlyModOn;
+    public bool OnlyModOn {
+        get => _onlyModOn;
+        set {
+            if(_onlyModOn == value) {
+                return;
+            }
+
+            _onlyModOn = value;
+            ApplyState(Core.IsModEnabled);
+        }
+    }
+
     private readonly CanvasGroup canvasGroup;
     private Sequence blockSeq;
 
     protected UIObject(string id, RectTransform rect, bool onlyModOn = false) {
         Id = id;
         Rect = rect;
-        this.onlyModOn = onlyModOn;
+        _onlyModOn = onlyModOn;
 
-        canvasGroup = rect.GetComponent<CanvasGroup>() ?? rect.gameObject.AddComponent<CanvasGroup>();
+        canvasGroup =
+            rect.GetComponent<CanvasGroup>() ?? rect.gameObject.AddComponent<CanvasGroup>();
 
-        Core.OnModEnabledChanged += HandleModState;
+        Core.OnModEnabledChanged += ApplyState;
+
+        ApplyState(Core.IsModEnabled);
     }
 
-    private void HandleModState(bool enabled) {
-        if(onlyModOn) {
+    private void ApplyState(bool enabled) {
+        if(_onlyModOn) {
             SetBlocked(!enabled);
             return;
         }

@@ -211,7 +211,7 @@ internal static class PageSettings {
             "Show Autoplay Judgment",
             "show_autoplay_judgment"
         );
-        showAutoJudgmentToggle.onlyModOn = true;
+        showAutoJudgmentToggle.OnlyModOn = true;
         showAutoJudgmentToggle.Text.gameObject.AddComponent<TextLocalization>().Init("SHOW_AUTOPLAY_JUDGMENT", "Show Autoplay Judgment");
         objects[showAutoJudgmentToggle.Id] = showAutoJudgmentToggle;
 
