@@ -6,6 +6,7 @@ using Overlayer.Patch.Safe;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Objects;
 using Overlayer.UI.Objects.Impl;
+using Overlayer.UI.Utility;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,15 +19,12 @@ internal static class PageSettings {
         GameObject pad = new("Pad");
         pad.transform.SetParent(parent, false);
 
-        RectTransform rect = pad.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.pivot = new(0.5f, 0.5f);
-        rect.offsetMin = new(18f, 18f);
-        rect.offsetMax = new(-18f, -18f);
-
-        ScrollRect scroll = pad.AddComponent<ScrollRect>();
-        scroll.horizontal = false;
+        RectTransform padRect = pad.AddComponent<RectTransform>();
+        padRect.anchorMin = Vector2.zero;
+        padRect.anchorMax = Vector2.one;
+        padRect.pivot = new Vector2(0.5f, 0.5f);
+        padRect.offsetMin = new Vector2(18f, 18f);
+        padRect.offsetMax = new Vector2(-18f, -18f);
 
         GameObject viewport = new("Viewport");
         viewport.transform.SetParent(pad.transform, false);
@@ -36,16 +34,18 @@ internal static class PageSettings {
         viewportRect.anchorMax = Vector2.one;
         viewportRect.offsetMin = Vector2.zero;
         viewportRect.offsetMax = Vector2.zero;
+        viewportRect.pivot = new Vector2(0.5f, 0.5f);
 
+        viewport.AddComponent<EmptyGraphic>().raycastTarget = true;
         viewport.AddComponent<RectMask2D>();
 
         GameObject content = new("Content");
         content.transform.SetParent(viewport.transform, false);
 
         RectTransform contentRect = content.AddComponent<RectTransform>();
-        contentRect.anchorMin = new(0f, 1f);
-        contentRect.anchorMax = new(1f, 1f);
-        contentRect.pivot = new(0.5f, 1f);
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
         contentRect.offsetMin = Vector2.zero;
         contentRect.offsetMax = Vector2.zero;
 
@@ -59,8 +59,7 @@ internal static class PageSettings {
         ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        scroll.viewport = viewportRect;
-        scroll.content = contentRect;
+        pad.AddComponent<UIScrollController>().SetContent(contentRect, viewportRect);
 
         Settings defSet = new();
 
@@ -126,7 +125,7 @@ internal static class PageSettings {
             br.pivot = new(1f, 1f);
             br.anchorMin = new(1f, 1f);
             br.anchorMax = new(1f, 1f);
-            br.sizeDelta = new(140f, 50f);
+            br.sizeDelta = new(114f, 50f);
             br.offsetMax = Vector2.zero;
         }
         langBtn.Label.gameObject.AddComponent<TextLocalization>().Init("RELOAD", "Reload");
@@ -186,51 +185,54 @@ internal static class PageSettings {
             "Setting that restores an item to its default value when you middle-click on it.\nYou can identify it by a small dot at the top-left of the item"
         );
         objects[middleClickToggle.Id] = middleClickToggle;
-        
+
+        static float uiScaleFilter(float v) {
+            v = Mathf.Round(v * 100f) / 100f;
+            return Mathf.Clamp(v, 0.8f, 1.6f);
+        }
+
         UISlider uiScale = GenerateUI.Slider(
             GenerateUI.Row(content.transform),
             1f,
             0.8f,
             1.6f,
             Core.Config.UIScale,
+            uiScaleFilter,
             null,
             null,
             "UI Scale",
             "ui_scale"
         );
+
         uiScale.Format = "0.00x";
-        uiScale.OnChanged = value => {
-            value = Mathf.Round(value * 100f) / 100f;
 
-            Core.Config.UIScale = value;
-            Core.Config.RequestSave();
+        uiScale.OnChanged = value
+            => Core.Config.UIScale = value;
 
-            uiScale.SetOnlyValue(value);
-        };
         Sequence seq = null;
-        uiScale.OnComplete = value => {
-            value = Mathf.Round(value * 100f) / 100f;
 
+        uiScale.OnComplete = value => {
             Core.Config.UIScale = value;
             Core.Config.RequestSave();
-
-            uiScale.SetOnlyValue(value);
 
             seq?.Kill();
 
-            float startScale = UICore.PanelScale;
-            Vector3 startLocalScale = UICore.Panel.localScale;
-
-            seq = DOTween.Sequence()
-                .SetUpdate(true)
+            float scaleStart = UICore.PanelScale;
+            Vector2 targetSize = UICore.DefaultPanelSize;
+            UICore.LastPanelSize = targetSize;
+            seq = DOTween.Sequence().SetUpdate(true)
                 .Append(
                     DOTween.To(
-                        () => startScale,
-                        x => { UICore.PanelScale = x; },
+                        () => scaleStart,
+                        x => UICore.PanelScale = x,
                         value,
-                        0.6f
+                        0.4f
                     ).SetEase(Ease.OutExpo)
-                ).SetUpdate(true);
+                ).Join(
+                    UICore.Panel
+                    .DOSizeDelta(targetSize, 0.4f)
+                    .SetEase(Ease.OutExpo)
+                );
         };
         uiScale.Label.gameObject.AddComponent<TextLocalization>().Init("UI_SCALE", "UI Scale");
         objects[uiScale.Id] = uiScale;

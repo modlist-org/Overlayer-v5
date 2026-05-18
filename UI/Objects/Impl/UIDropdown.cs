@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using Overlayer.UI.Generator;
 using Overlayer.UI.SpriteManage;
+using Overlayer.UI.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -122,7 +123,7 @@ public class UIDropDown<T> : UIObject {
     public void UpdateVisual() {
         triangleSeq?.Kill();
 
-        triangleSeq = DOTween.Sequence()
+        triangleSeq = DOTween.Sequence().SetUpdate(true)
             .Join(
                 TriangleRect.DORotate(
                     Expanded
@@ -138,7 +139,7 @@ public class UIDropDown<T> : UIObject {
                         : UIColors.ObjectInactive,
                     0.2f
                 ).SetEase(Ease.OutSine)
-            ).SetUpdate(true);
+            );
 
         changeSeq?.Kill();
 
@@ -146,8 +147,8 @@ public class UIDropDown<T> : UIObject {
             DefaultValue == null ||
             EqualityComparer<T>.Default.Equals(DefaultValue, Value);
 
-        changeSeq = DOTween.Sequence().Append(
-            DOTween.To(
+        changeSeq = DOTween.Sequence().SetUpdate(true)
+            .Append(DOTween.To(
                 () => ChangedImage.color.a,
                 x => {
                     Color c = ChangedImage.color;
@@ -156,7 +157,7 @@ public class UIDropDown<T> : UIObject {
                 },
                 isDefault ? 0f : 1f,
                 0.2f
-            ).SetEase(Ease.OutSine).SetUpdate(true)
+            ).SetEase(Ease.OutSine)
         );
     }
 
@@ -188,29 +189,29 @@ public class UIDropDown<T> : UIObject {
 
             Sequence hoverSeq = null;
 
-            GenerateUI.AddEvent(EventTriggerType.PointerEnter, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().Append(
+                hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
                     rowImage.DOColor(
                         UIColors.ObjectActive,
                         0.12f
                     ).SetEase(Ease.OutSine)
-                ).SetUpdate(true);
+                );
             }, trigger);
 
-            GenerateUI.AddEvent(EventTriggerType.PointerExit, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().Append(
+                hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
                     rowImage.DOColor(
                         Color.clear,
                         0.12f
                     ).SetEase(Ease.OutSine)
-                ).SetUpdate(true);
+                );
             }, trigger);
 
-            GenerateUI.AddEvent(EventTriggerType.PointerClick, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerClick, e => {
                 if(e.button != PointerEventData.InputButton.Left) {
                     return;
                 }

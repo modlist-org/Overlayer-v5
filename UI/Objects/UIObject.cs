@@ -66,13 +66,12 @@ public abstract class UIObject {
 
         blockSeq?.Kill();
 
-        blockSeq = DOTween.Sequence()
+        blockSeq = DOTween.Sequence().SetUpdate(true)
             .Join(DOTween.To(
                 () => CanvasGroup.alpha,
                 x => CanvasGroup.alpha = x,
                 targetAlpha,
                 0.15f
-            ).SetEase(Ease.OutSine))
-            .SetUpdate(true);
+            ).SetEase(Ease.OutSine));
     }
 }

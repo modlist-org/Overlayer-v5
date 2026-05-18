@@ -466,6 +466,8 @@
 		<Compile Include="UI\UICore.cs" />
 		<Compile Include="UI\Utility\EmptyGraphic.cs" />
 		<Compile Include="UI\Utility\NonRaycastButton.cs" />
+		<Compile Include="UI\Utility\UIScrollController.cs" />
+		<Compile Include="UI\Utility\UnityUtils.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>
 
@@ -494,7 +496,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Tag\" />
-	  <Folder Include="UI\Components\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="Build">

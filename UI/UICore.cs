@@ -40,7 +40,8 @@ internal static class UICore {
 
         canvasScaler = canvasObj.AddComponent<CanvasScaler>();
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        canvasScaler.referenceResolution = new Vector2(ReferenceResolution.x, ReferenceResolution.y) / Core.Config.UIScale;
+        //canvasScaler.referenceResolution = new(1920, 1080);
+        PanelScale = Core.Config.UIScale;
         canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         canvasScaler.matchWidthOrHeight = 0.5f;
 
@@ -99,13 +100,8 @@ internal static class UICore {
         Panel.anchorMin = new(0.5f, 0.5f);
         Panel.anchorMax = new(0.5f, 0.5f);
         Panel.pivot = new(0.5f, 0.5f);
-        Panel.sizeDelta = new(
-            Mathf.Min(1280, Screen.width),
-            Mathf.Min(720, Screen.height)
-        );
-
+        Panel.sizeDelta = LastPanelSize = DefaultPanelSize;
         LastPanelPosition = Panel.position;
-        LastPanelSize = Panel.sizeDelta;
 
         panel.AddComponent<RectMask2D>();
 
@@ -210,7 +206,7 @@ internal static class UICore {
                     : UIColors.SoftRed;
 
                 powerSeq?.Kill();
-                powerSeq = DOTween.Sequence().Append(powerBg.DOColor(target, 0.32f).SetEase(Ease.OutExpo));
+                powerSeq = DOTween.Sequence().SetUpdate(true).Append(powerBg.DOColor(target, 0.32f).SetEase(Ease.OutExpo));
             });
             GameObject powerIcon = new("PowerIcon");
             powerIcon.transform.SetParent(powerRect, false);
@@ -347,10 +343,10 @@ internal static class UICore {
 
     private static bool isOpen = false;
 
-    public static Vector2 LastPanelPosition { get; private set; }
-    public static Vector2 LastPanelSize { get; private set; }
+    public static Vector2 LastPanelPosition;
+    public static Vector2 LastPanelSize;
 
-    private static Vector2 DefaultPanelSize => new(
+    public static Vector2 DefaultPanelSize => new(
         Mathf.Min(1280f / Core.Config.UIScale, Screen.width / Core.Config.UIScale),
         Mathf.Min(720f / Core.Config.UIScale, Screen.height / Core.Config.UIScale)
     );
@@ -513,7 +509,7 @@ internal static class UICore {
             return;
         }
 
-        resetSequence = DOTween.Sequence()
+        resetSequence = DOTween.Sequence().SetUpdate(true)
             .Join(
                 Panel
                     .DOAnchorPos(LastPanelPosition, 0.26f)
@@ -523,8 +519,7 @@ internal static class UICore {
                 Panel
                     .DOSizeDelta(LastPanelSize, 0.26f)
                     .SetEase(Ease.OutExpo)
-            )
-            .SetUpdate(true);
+            );
     }
 
     private static bool isMenuOpen = false;
@@ -539,7 +534,7 @@ internal static class UICore {
         menuCanvasGroup.interactable = true;
         menuCanvasGroup.blocksRaycasts = true;
 
-        menuSequence = DOTween.Sequence()
+        menuSequence = DOTween.Sequence().SetUpdate(true)
             .Join(Menu.DOAnchorPos(Vector2.zero, 0.6f).SetEase(Ease.OutExpo))
             .Join(menuCanvasGroup.DOFade(1f, 0.4f).SetEase(Ease.OutSine))
             .Join(DOTween.To(
@@ -547,7 +542,7 @@ internal static class UICore {
                 x => Page.offsetMin = x,
                 new(MENU_WIDTH, 0),
                 0.6f
-            ).SetEase(Ease.OutExpo)).SetUpdate(true);
+            ).SetEase(Ease.OutExpo));
 
         isMenuOpen = true;
     }
@@ -558,7 +553,7 @@ internal static class UICore {
         menuCanvasGroup.interactable = false;
         menuCanvasGroup.blocksRaycasts = false;
 
-        menuSequence = DOTween.Sequence()
+        menuSequence = DOTween.Sequence().SetUpdate(true)
             .Join(Menu.DOAnchorPos(new(-MENU_WIDTH, 0), 0.4f).SetEase(Ease.OutExpo))
             .Join(menuCanvasGroup.DOFade(0f, 0.3f).SetEase(Ease.OutSine))
             .Join(DOTween.To(
@@ -566,7 +561,7 @@ internal static class UICore {
                     x => Page.offsetMin = x,
                     new(0, 0),
                     0.4f
-                ).SetEase(Ease.OutExpo)).SetUpdate(true);
+                ).SetEase(Ease.OutExpo));
 
         isMenuOpen = false;
     }

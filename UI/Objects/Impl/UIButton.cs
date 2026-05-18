@@ -29,17 +29,17 @@ public class UIButton : UIObject {
 
     public void OnHoverEnter() {
         hoverSeq?.Kill();
-        hoverSeq = DOTween.Sequence()
+        hoverSeq = DOTween.Sequence().SetUpdate(true)
             .Join(Background.DOColor(UIColors.ObjectActiveLightBright, 0.12f)
-                .SetEase(Ease.OutSine)).SetUpdate(true);
+                .SetEase(Ease.OutSine));
     }
 
     public void OnHoverExit() {
         hoverSeq?.Kill();
 
-        hoverSeq = DOTween.Sequence()
+        hoverSeq = DOTween.Sequence().SetUpdate(true)
             .Join(Background.DOColor(UIColors.ObjectButton, 0.12f)
-                .SetEase(Ease.OutSine)).SetUpdate(true);
+                .SetEase(Ease.OutSine));
     }
 
     public void Click(bool invoke = true) {
@@ -54,9 +54,9 @@ public class UIButton : UIObject {
         Background.color = UIColors.ObjectActiveBright;
 
         hoverSeq?.Kill();
-        hoverSeq = DOTween.Sequence().Append(
+        hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
             Background.DOColor(UIColors.ObjectButton, 0.2f)
-                .SetEase(Ease.OutSine).SetUpdate(true)
+                .SetEase(Ease.OutSine)
         );
     }
 }

@@ -105,7 +105,7 @@ public class Tooltip {
         canvas.alpha = 0f;
         visible = true;
 
-        seq = DOTween.Sequence()
+        seq = DOTween.Sequence().SetUpdate(true)
             .AppendInterval(0.14f)
             .Append(DOTween.To(
                 () => canvas.alpha,
@@ -122,7 +122,7 @@ public class Tooltip {
 
         seq?.Kill();
 
-        seq = DOTween.Sequence()
+        seq = DOTween.Sequence().SetUpdate(true)
             .Append(DOTween.To(
                 () => canvas.alpha,
                 x => canvas.alpha = x,

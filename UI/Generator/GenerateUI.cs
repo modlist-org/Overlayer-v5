@@ -2,6 +2,7 @@
 using Overlayer.Resource;
 using Overlayer.UI.Objects.Impl;
 using Overlayer.UI.SpriteManage;
+using Overlayer.UI.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -119,8 +120,8 @@ public static class GenerateUI {
         EventTrigger trigger = rect.gameObject.GetComponent<EventTrigger>()
             ?? rect.gameObject.AddComponent<EventTrigger>();
 
-        AddEvent(EventTriggerType.PointerEnter, e => button.OnHoverEnter(), trigger);
-        AddEvent(EventTriggerType.PointerExit, e => button.OnHoverExit(), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => button.OnHoverEnter(), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, e => button.OnHoverExit(), trigger);
 
         return button;
     }
@@ -131,6 +132,7 @@ public static class GenerateUI {
         float min,
         float max,
         float value,
+        Func<float, float> filter,
         Action<float> onChanged,
         Action<float> onComplete,
         string text,
@@ -140,6 +142,19 @@ public static class GenerateUI {
         rect.SetParent(parent, false);
 
         rect.gameObject.AddComponent<EventTrigger>();
+
+        GameObject change = AddSmallChangedCircle(rect);
+        Image changeImg = change.GetComponent<Image>();
+
+        GameObject fill = new("Fill");
+        fill.transform.SetParent(rect, false);
+
+        RectTransform fillRect = fill.AddComponent<RectTransform>();
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(0f, 1f);
+        fillRect.pivot = new Vector2(0f, 0.5f);
+        fillRect.anchoredPosition = Vector2.zero;
+        fillRect.sizeDelta = Vector2.zero;
 
         TextMeshProUGUI label = AddText(rect);
         label.text = text;
@@ -152,21 +167,16 @@ public static class GenerateUI {
         valueTextRect.offsetMin = Vector2.zero;
         valueTextRect.offsetMax = new(-16f, 0f);
 
-        GameObject fill = new("Fill");
-        fill.transform.SetParent(rect, false);
-        fill.transform.SetAsFirstSibling();
-
-        RectTransform fillRect = fill.AddComponent<RectTransform>();
-        fillRect.anchorMin = new Vector2(0f, 0f);
-        fillRect.anchorMax = new Vector2(0f, 1f);
-        fillRect.pivot = new Vector2(0f, 0.5f);
-        fillRect.anchoredPosition = Vector2.zero;
-        fillRect.sizeDelta = Vector2.zero;
-
         Image fillImg = fill.AddComponent<Image>();
         fillImg.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P2048);
         fillImg.type = Image.Type.Sliced;
         fillImg.color = UIColors.ObjectActive;
+
+        fill.AddComponent<Mask>().showMaskGraphic = true;
+
+        GameObject changeUp = AddSmallChangedCircle(fillRect);
+        Image changeImgUp = changeUp.GetComponent<Image>();
+        changeImgUp.color = UIColors.ObjectBG;
 
         UISlider slider = new(
             id,
@@ -175,59 +185,65 @@ public static class GenerateUI {
             fillImg,
             label,
             valueText,
+            changeImg,
+            changeImgUp,
             defaultValue,
             min,
             max,
             value,
+            filter,
             onChanged,
             onComplete
         );
+
+        float Apply(float v) {
+            v = filter != null ? filter(v) : v;
+            return Mathf.Clamp(v, min, max);
+        }
 
         void SetFromMouse() {
             Vector2 local = rect.InverseTransformPoint(Input.mousePosition);
             float width = rect.rect.width;
 
             float t = Mathf.Clamp01((local.x + width * 0.5f) / width);
-            slider.SetNormalized(t);
+            float v = Mathf.Lerp(min, max, t);
+
+            slider.Set(Apply(v));
         }
 
         AddButton(rect.gameObject, e => {
-            switch (e) {
+            switch(e) {
                 case InputButton.Left:
                     SetFromMouse();
-
                     slider.OnComplete?.Invoke(slider.Value);
                     break;
 
                 case InputButton.Middle:
-                    slider.Set(defaultValue);
-
+                    slider.Set(Apply(defaultValue));
                     slider.OnComplete?.Invoke(slider.Value);
                     break;
             }
         }, true);
 
-        EventTrigger trigger = rect.gameObject.GetComponent<EventTrigger>();
-        if (trigger == null) {
-            trigger = rect.gameObject.AddComponent<EventTrigger>();
-        }
+        EventTrigger trigger = rect.gameObject.GetComponent<EventTrigger>()
+            ?? rect.gameObject.AddComponent<EventTrigger>();
 
         bool isDragging = false;
 
-        AddEvent(EventTriggerType.BeginDrag, data => {
+        UnityUtils.AddEvent(EventTriggerType.BeginDrag, _ => {
             isDragging = true;
         }, trigger);
 
-        AddEvent(EventTriggerType.Drag, data => {
-            if (!isDragging || !Input.GetMouseButton(0)) {
+        UnityUtils.AddEvent(EventTriggerType.Drag, _ => {
+            if(!isDragging || !Input.GetMouseButton(0)) {
                 return;
             }
 
             SetFromMouse();
         }, trigger);
 
-        AddEvent(EventTriggerType.EndDrag, data => {
-            if (!isDragging) {
+        UnityUtils.AddEvent(EventTriggerType.EndDrag, _ => {
+            if(!isDragging) {
                 return;
             }
 
@@ -235,7 +251,7 @@ public static class GenerateUI {
             slider.OnComplete?.Invoke(slider.Value);
         }, trigger);
 
-        slider.Set(value, false);
+        slider.Set(Apply(value), false);
 
         return slider;
     }
@@ -294,7 +310,7 @@ public static class GenerateUI {
         listRect.anchorMax = new(1f, 1f);
         listRect.pivot = new(0.5f, 1f);
         listRect.offsetMin = new(0f, -62f);
-        listRect.offsetMax = new(-300f, -62f);
+        listRect.offsetMax = new(-250f, -62f);
 
         Image listBg = list.AddComponent<Image>();
         listBg.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P2048);
@@ -348,7 +364,7 @@ public static class GenerateUI {
 
             layoutSeq?.Kill();
 
-            layoutSeq = DOTween.Sequence()
+            layoutSeq = DOTween.Sequence().SetUpdate(true)
                 .Join(DOTween.To(
                     () => parentLayout.preferredHeight,
                     x => {
@@ -363,8 +379,7 @@ public static class GenerateUI {
                     x => listCg.alpha = x,
                     targetAlpha,
                     0.16f
-                ).SetEase(Ease.OutSine))
-                .SetUpdate(true);
+                ).SetEase(Ease.OutSine));
         }
 
         dropdown.OnLayoutChanged = () => {
@@ -391,26 +406,28 @@ public static class GenerateUI {
 
             Sequence hoverSeq = null;
 
-            AddEvent(EventTriggerType.PointerEnter, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().Append(
+                hoverSeq = DOTween.Sequence().SetUpdate(true)
+                .Append(
                     rowImage.DOColor(
                         UIColors.ObjectActive,
                         0.12f
                     ).SetEase(Ease.OutSine)
-                ).SetUpdate(true);
+                );
             }, trigger);
 
-            AddEvent(EventTriggerType.PointerExit, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().Append(
+                hoverSeq = DOTween.Sequence().SetUpdate(true)
+                .Append(
                     rowImage.DOColor(
                         Color.clear,
                         0.12f
                     ).SetEase(Ease.OutSine)
-                ).SetUpdate(true);
+                );
             }, trigger);
         }
 
@@ -440,12 +457,6 @@ public static class GenerateUI {
         return dropdown;
     }
 
-    public static void AddEvent(EventTriggerType type, Action<PointerEventData> cb, EventTrigger trigger) {
-        var entry = new EventTrigger.Entry { eventID = type };
-        entry.callback.AddListener(e => cb((PointerEventData)e));
-        trigger.triggers.Add(entry);
-    }
-
     public enum BackGroundType {
         Main,
         Sub,
@@ -459,7 +470,7 @@ public static class GenerateUI {
         rect.anchorMax = new(1f, 1f);
         rect.pivot = new(0.5f, 0.5f);
         rect.offsetMin = Vector2.zero;
-        rect.offsetMax = new(-300f, 0f);
+        rect.offsetMax = new(-250f, 0f);
 
         Image img = obj.AddComponent<Image>();
         img.color = UIColors.ObjectBG;
@@ -480,7 +491,7 @@ public static class GenerateUI {
     }
 
     private static void AddClick(EventTrigger trigger, Action<InputButton> onClick)
-        => AddEvent(EventTriggerType.PointerClick, (e) => onClick?.Invoke(e.button), trigger);
+        => UnityUtils.AddEvent(EventTriggerType.PointerClick, (e) => onClick?.Invoke(e.button), trigger);
 
     private static void AddOutlineHover(GameObject obj, EventTrigger trigger) {
         Sequence hoverSeq = null;
@@ -503,11 +514,11 @@ public static class GenerateUI {
         Color baseColor = UIColors.ObjectActive;
         hoverImage.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0f);
 
-        AddEvent(EventTriggerType.PointerEnter, (e) =>  {
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, (e) =>  {
             hoverSeq?.Kill();
 
-            hoverSeq = DOTween.Sequence().Append(
-                DOTween.To(
+            hoverSeq = DOTween.Sequence().SetUpdate(true)
+                .Append(DOTween.To(
                     () => hoverImage.color.a,
                     x => {
                         Color c = hoverImage.color;
@@ -517,14 +528,14 @@ public static class GenerateUI {
                     1f,
                     0.1f
                 ).SetEase(Ease.OutSine)
-            ).SetUpdate(true);
+            );
         }, trigger);
 
-        AddEvent(EventTriggerType.PointerExit, (e) => {
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, (e) => {
             hoverSeq?.Kill();
 
-            hoverSeq = DOTween.Sequence().Append(
-                DOTween.To(
+            hoverSeq = DOTween.Sequence().SetUpdate(true)
+                .Append(DOTween.To(
                     () => hoverImage.color.a,
                     x => {
                         Color c = hoverImage.color;
@@ -534,7 +545,7 @@ public static class GenerateUI {
                     0f,
                     0.1f
                 ).SetEase(Ease.OutSine)
-            ).SetUpdate(true);
+            );
         }, trigger);
     }
 
@@ -585,9 +596,9 @@ public static class GenerateUI {
         EventTrigger trigger = parent.gameObject.GetComponent<EventTrigger>()
             ?? parent.gameObject.AddComponent<EventTrigger>();
 
-        AddEvent(EventTriggerType.PointerEnter, (e) => Tooltip.Show(Core.Tr.Get(key, def)), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, (e) => Tooltip.Show(Core.Tr.Get(key, def)), trigger);
 
-        AddEvent(EventTriggerType.PointerExit, (e) => Tooltip.Hide(), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, (e) => Tooltip.Hide(), trigger);
 
         return parent;
     }

@@ -23,7 +23,7 @@ internal class PageSwicher {
         toCg.interactable = false;
         toCg.blocksRaycasts = false;
 
-        pageSeq = DOTween.Sequence();
+        pageSeq = DOTween.Sequence().SetUpdate(true);
 
         pageSeq.Join(fromPage.DOAnchorPosX(-420f, 0.35f).SetEase(Ease.OutCubic));
         pageSeq.Join(fromCg.DOFade(0f, 0.3f));
@@ -38,7 +38,5 @@ internal class PageSwicher {
             toCg.interactable = true;
             toCg.blocksRaycasts = true;
         });
-
-        pageSeq.SetUpdate(true);
     }
 }

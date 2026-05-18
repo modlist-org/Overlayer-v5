@@ -29,8 +29,8 @@ public class ResizeHandle
     private Vector2 startSize;
     private Vector2 startPos;
 
-    private const float MinWidth = 900f;
-    private const float MinHeight = 500f;
+    public const float MIN_WIDTH = 900f;
+    public const float MIN_HEIGHT = 500f;
 
     public void OnPointerDown(PointerEventData eventData) {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -64,7 +64,7 @@ public class ResizeHandle
             or ResizeHandleType.TopRight
             or ResizeHandleType.BottomRight) {
             float newWidth = Mathf.Max(
-                MinWidth,
+                MIN_WIDTH / Core.Config.UIScale,
                 startSize.x + delta.x
             );
 
@@ -79,7 +79,7 @@ public class ResizeHandle
             or ResizeHandleType.TopLeft
             or ResizeHandleType.BottomLeft) {
             float newWidth = Mathf.Max(
-                MinWidth,
+                MIN_WIDTH / Core.Config.UIScale,
                 startSize.x - delta.x
             );
 
@@ -94,7 +94,7 @@ public class ResizeHandle
             or ResizeHandleType.TopLeft
             or ResizeHandleType.TopRight) {
             float newHeight = Mathf.Max(
-                MinHeight,
+                MIN_HEIGHT / Core.Config.UIScale,
                 startSize.y + delta.y
             );
 
@@ -109,7 +109,7 @@ public class ResizeHandle
             or ResizeHandleType.BottomLeft
             or ResizeHandleType.BottomRight) {
             float newHeight = Mathf.Max(
-                MinHeight,
+                MIN_HEIGHT / Core.Config.UIScale,
                 startSize.y - delta.y
             );
 

@@ -104,18 +104,16 @@ public static class MenuFactory {
         Add(EventTriggerType.PointerEnter, () => {
             if(UICore.CurrentMenuState != state) {
                 menuItem.hoverSeq?.Kill();
-                menuItem.hoverSeq = DOTween.Sequence()
-                    .Append(bg.DOColor(UIColors.MenuHover, 0.2f).SetEase(Ease.OutSine))
-                    .SetUpdate(true);
+                menuItem.hoverSeq = DOTween.Sequence().SetUpdate(true)
+                    .Append(bg.DOColor(UIColors.MenuHover, 0.2f).SetEase(Ease.OutSine));
             }
         });
 
         Add(EventTriggerType.PointerExit, () => {
             if(UICore.CurrentMenuState != state) {
                 menuItem.hoverSeq?.Kill();
-                menuItem.hoverSeq = DOTween.Sequence()
-                    .Append(bg.DOColor(UIColors.MenuNormal, 0.3f).SetEase(Ease.OutSine))
-                    .SetUpdate(true);
+                menuItem.hoverSeq = DOTween.Sequence().SetUpdate(true)
+                    .Append(bg.DOColor(UIColors.MenuNormal, 0.3f).SetEase(Ease.OutSine));
             }
         });
 
@@ -125,9 +123,8 @@ public static class MenuFactory {
             bg.DOKill();
             bg.color = UIColors.MenuHighlight;
 
-            menuItem.hoverSeq = DOTween.Sequence()
-                .Append(bg.DOColor(UIColors.MenuSelected, 0.3f).SetEase(Ease.OutSine))
-                .SetUpdate(true);
+            menuItem.hoverSeq = DOTween.Sequence().SetUpdate(true)
+                .Append(bg.DOColor(UIColors.MenuSelected, 0.3f).SetEase(Ease.OutSine));
         });
     }
 

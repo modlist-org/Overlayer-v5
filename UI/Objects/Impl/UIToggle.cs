@@ -64,7 +64,7 @@ public class UIToggle : UIObject {
 
         CircleRect.sizeDelta = new(30f, 30f);
 
-        circleSeq = DOTween.Sequence()
+        circleSeq = DOTween.Sequence().SetUpdate(true)
             .Join(
                 DOTween.To(
                     () => CircleRect.sizeDelta.x,
@@ -80,7 +80,7 @@ public class UIToggle : UIObject {
                         : UIColors.ObjectInactive,
                     0.15f
                 ).SetEase(Ease.OutQuad)
-            ).SetUpdate(true);
+            );
 
         changeSeq?.Kill();
 
@@ -88,8 +88,8 @@ public class UIToggle : UIObject {
             ? 1f
             : 0f;
 
-        changeSeq = DOTween.Sequence().Append(
-            DOTween.To(
+        changeSeq = DOTween.Sequence().SetUpdate(true)
+            .Append(DOTween.To(
                 () => ChangedImage.color.a,
                 x => {
                     Color c = ChangedImage.color;
@@ -99,6 +99,6 @@ public class UIToggle : UIObject {
                 target,
                 0.2f
             ).SetEase(Ease.OutSine)
-        ).SetUpdate(true);
+        );
     }
 }
