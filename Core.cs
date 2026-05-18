@@ -19,11 +19,11 @@ namespace Overlayer;
 
 public class Core : MelonMod {
     public static readonly Version OverlayerVersion = new(Overlayer.Info.Version);
-    internal static Assembly OverlayerAssembly = Assembly.GetExecutingAssembly();
+    internal static readonly Assembly OverlayerAssembly = Assembly.GetExecutingAssembly();
     internal static MelonLogger.Instance Logger;
     internal static GameObject OverlayerObject;
     internal static Translator Tr;
-    public static Settings Config;
+    public static Settings Config { get; private set; }
 
     public static bool IsModEnabled { get; private set; } = false;
     public static event Action<bool> OnModEnabledChanged;
@@ -33,12 +33,12 @@ public class Core : MelonMod {
         "Overlayer"
     );
 
-    private IEnumerator InitializeRoutine() {
+    private static IEnumerator InitializeRoutine() {
         yield return CreateOverlayerObject();
         yield return InitializeAsync();
     }
 
-    private IEnumerator CreateOverlayerObject() {
+    private static IEnumerator CreateOverlayerObject() {
         for(; ; ) {
             if(OverlayerObject == null) {
                 OverlayerObject = new GameObject("Overlayer");
@@ -55,11 +55,12 @@ public class Core : MelonMod {
         }
     }
 
-    private void DistroyOverlayerObject() {
-        if(OverlayerObject != null) {
-            UnityEngine.Object.Destroy(OverlayerObject);
-            OverlayerObject = null;
+    private static void DistroyOverlayerObject() {
+        if (OverlayerObject == null) {
+            return;
         }
+        UnityEngine.Object.Destroy(OverlayerObject);
+        OverlayerObject = null;
     }
 
     public override void OnInitializeMelon() {
@@ -77,11 +78,11 @@ public class Core : MelonMod {
         Dispose();
     }
 
-    public void TranslatorLogLinker(string log) => Logger.Msg(log);
+    public static void TranslatorLogLinker(string log) => Logger.Msg(log);
 
-    public void Initialize() => MelonCoroutines.Start(InitializeRoutine());
+    public static void Initialize() => MelonCoroutines.Start(InitializeRoutine());
 
-    private async Task InitializeAsync() {
+    private static async Task InitializeAsync() {
         await Task.Run(Config.Load);
         Tr.Language = Config.Language;
         Tr.SetLog(TranslatorLogLinker);
@@ -96,10 +97,10 @@ public class Core : MelonMod {
 
         UICore.Initialize();
 
-        LoggerInstance.Msg("Ok");
+        Logger.Msg("Ok");
     }
 
-    public void Dispose() {
+    public static void Dispose() {
         UICore.Dispose();
 
         SetModEnabled(false);

@@ -429,4 +429,4 @@ FodyWeavers.xsd
 *.msp
 
 # Overlayer
-Directory.Build.user.props
+Directory.Build.props

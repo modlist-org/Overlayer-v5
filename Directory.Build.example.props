@@ -1,0 +1,15 @@
+<!-- Directory.Build.props.example -->
+<Project>
+    <PropertyGroup>
+        <!--
+            Windows (Steam)
+            C:/Program Files (x86)/Steam/steamapps/common/A Dance of Fire and Ice
+
+            Linux (Steam)
+            ~/.local/share/Steam/steamapps/common/A Dance of Fire and Ice
+        -->
+        <GamePath>/path/to/game/</GamePath>
+
+        <GameData>A Dance of Fire and Ice_Data</GameData>
+    </PropertyGroup>
+</Project>
