@@ -12,7 +12,7 @@
 
 <div align="center">
 
-Custom UI mode for users!
+Custom Unity Overlay UI mode for users!
 
 </div>
 

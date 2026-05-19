@@ -4,7 +4,6 @@ using Overlayer.Compat.Interface;
 using MelonLoader.Utils;
 
 [assembly: MelonInfo(typeof(Overlayer.Loader.ML.Loader), Overlayer.Core.Info.Name,  Overlayer.Core.Info.Version,  Overlayer.Core.Info.Author,  Overlayer.Core.Info.DownloadLink)]
-[assembly: MelonGame("7th Beat Games", "A Dance of Fire and Ice")]
 
 namespace Overlayer.Loader.ML;
 
