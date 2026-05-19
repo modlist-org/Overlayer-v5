@@ -33,7 +33,7 @@ public class UISlider : UIObject {
     public TextMeshProUGUI ValueText { get; }
 
     public Image ChangedImage { get; }
-    public Image ChangedImageUp { get; }
+    public Image ChangedUpImage { get; }
 
     private Sequence fillSeq;
     private Sequence changeSeq;
@@ -46,7 +46,7 @@ public class UISlider : UIObject {
         TextMeshProUGUI label,
         TextMeshProUGUI valueText,
         Image changedImage,
-        Image changedImageUp,
+        Image changedUpImage,
         float defaultValue,
         float min,
         float max,
@@ -58,12 +58,14 @@ public class UISlider : UIObject {
     ) : base(id, rect) {
         FillRect = fillRect;
         FillImage = fillImage;
+        FillImage.color = UIColors.ObjectActive;
 
         Label = label;
         ValueText = valueText;
 
         ChangedImage = changedImage;
-        ChangedImageUp = changedImageUp;
+        ChangedUpImage = changedUpImage;
+        ChangedUpImage.color = UIColors.ObjectBG;
 
         DefaultValue = defaultValue;
         Min = min;
@@ -78,7 +80,7 @@ public class UISlider : UIObject {
         Value = ApplyFilter(value);
         Value = Mathf.Clamp(Value, Min, Max);
 
-        UpdateVisual(false);
+        UpdateVisual(true);
     }
 
     public void Set(float value, bool invoke = true) {
@@ -109,37 +111,44 @@ public class UISlider : UIObject {
 
     private void UpdateValueText() => ValueText?.text = Value.ToString(Format);
 
-    public void UpdateVisual(bool animate = true) {
-        float t = Normalize();
-
+    public void UpdateVisual(bool noAnimate = false) {
+        fillSeq?.Kill();
+        changeSeq?.Kill();
         UpdateValueText();
 
-        fillSeq?.Kill();
+        float t = Normalize();
+        Vector2 max = FillRect.anchorMax;
+        float changeAlpha = DefaultValue == Value ? 0f : 1f;
 
-        if(animate) {
-            fillSeq = DOTween.Sequence().SetUpdate(true).Join(
-                DOTween.To(
-                    () => FillRect.anchorMax.x,
-                    x => {
-                        Vector2 max = FillRect.anchorMax;
-                        max.x = x;
-                        FillRect.anchorMax = max;
-                    },
-                    t,
-                    0.6f
-                )
-                .SetEase(Ease.OutExpo)
-            );
-        } else {
-            Vector2 max = FillRect.anchorMax;
-            max.x = t;
-            FillRect.anchorMax = max;
+        if(noAnimate) {
+            Vector2 fra = FillRect.anchorMax;
+            fra.x = t;
+            FillRect.anchorMax = fra;
+
+            Color ci = ChangedImage.color;
+            ci.a = changeAlpha;
+            ChangedImage.color = ci;
+
+            Color cui = ChangedUpImage.color;
+            cui.a = changeAlpha;
+            ChangedUpImage.color = cui;
+
+            return;
         }
 
-        FillImage.color = UIColors.ObjectActive;
+        fillSeq = DOTween.Sequence().SetUpdate(true).Join(
+             DOTween.To(
+                 () => FillRect.anchorMax.x,
+                 x => {
+                     Vector2 anchor = FillRect.anchorMax;
+                     anchor.x = x;
+                     FillRect.anchorMax = anchor;
+                 },
+                 t,
+                 0.6f
+             ).SetEase(Ease.OutExpo)
+         );
 
-        changeSeq?.Kill();
-        float changeAlpha = DefaultValue == Value ? 0f : 1f;
         changeSeq = DOTween.Sequence().SetUpdate(true)
             .Join(DOTween.To(
                 () => ChangedImage.color.a,
@@ -152,11 +161,11 @@ public class UISlider : UIObject {
                 0.2f
             ).SetEase(Ease.OutSine))
             .Join(DOTween.To(
-                () => ChangedImageUp.color.a,
+                () => ChangedUpImage.color.a,
                 x => {
-                    Color c = ChangedImageUp.color;
+                    Color c = ChangedUpImage.color;
                     c.a = x;
-                    ChangedImageUp.color = c;
+                    ChangedUpImage.color = c;
                 },
                 changeAlpha,
                 0.2f

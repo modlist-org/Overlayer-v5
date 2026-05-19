@@ -38,7 +38,7 @@ public class UIToggle : UIObject {
         Value = value;
         OnChanged = onChanged;
 
-        UpdateVisual();
+        UpdateVisual(true);
     }
 
     public void Set(bool value, bool invoke = true) {
@@ -55,14 +55,26 @@ public class UIToggle : UIObject {
 
     public void Reset() => Set(DefaultValue);
 
-    public void UpdateVisual() {
+    public void UpdateVisual(bool noAnimate = false) {
+        circleSeq?.Kill();
+        changeSeq?.Kill();
+
         CircleImage.sprite = SpriteDatabase.Get(
             Value ? UISprite.Circle256 : UISprite.ToggleCircle128
         );
 
-        circleSeq?.Kill();
-
         CircleRect.sizeDelta = new(30f, 30f);
+
+        if(noAnimate) {
+            CircleRect.sizeDelta = new(26f, 26f);
+            CircleImage.color = Value ? UIColors.ObjectActive : UIColors.ObjectInactive;
+
+            Color c = ChangedImage.color;
+            c.a = (DefaultValue != Value) ? 1f : 0f;
+            ChangedImage.color = c;
+
+            return;
+        }
 
         circleSeq = DOTween.Sequence().SetUpdate(true)
             .Join(
@@ -75,30 +87,25 @@ public class UIToggle : UIObject {
             )
             .Join(
                 CircleImage.DOColor(
-                    Value
-                        ? UIColors.ObjectActive
-                        : UIColors.ObjectInactive,
+                    Value ? UIColors.ObjectActive : UIColors.ObjectInactive,
                     0.15f
                 ).SetEase(Ease.OutQuad)
             );
 
-        changeSeq?.Kill();
-
-        float target = DefaultValue != Value
-            ? 1f
-            : 0f;
+        float target = DefaultValue != Value ? 1f : 0f;
 
         changeSeq = DOTween.Sequence().SetUpdate(true)
-            .Append(DOTween.To(
-                () => ChangedImage.color.a,
-                x => {
-                    Color c = ChangedImage.color;
-                    c.a = x;
-                    ChangedImage.color = c;
-                },
-                target,
-                0.2f
-            ).SetEase(Ease.OutSine)
-        );
+            .Append(
+                DOTween.To(
+                    () => ChangedImage.color.a,
+                    x => {
+                        Color c = ChangedImage.color;
+                        c.a = x;
+                        ChangedImage.color = c;
+                    },
+                    target,
+                    0.2f
+                ).SetEase(Ease.OutSine)
+            );
     }
 }

@@ -24,7 +24,7 @@ public class UIButton : UIObject {
         Background = background;
         OnClick = onClick;
 
-        UpdateVisual();
+        UpdateVisual(true);
     }
 
     public void OnHoverEnter() {
@@ -50,10 +50,15 @@ public class UIButton : UIObject {
         UpdateVisual();
     }
 
-    public void UpdateVisual() {
+    public void UpdateVisual(bool noAnimate = false) {
+        hoverSeq?.Kill();
+        if(noAnimate) {
+            Background.color = UIColors.ObjectButton;
+            return;
+        }
+
         Background.color = UIColors.ObjectActiveBright;
 
-        hoverSeq?.Kill();
         hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
             Background.DOColor(UIColors.ObjectButton, 0.2f)
                 .SetEase(Ease.OutSine)

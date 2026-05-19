@@ -171,13 +171,11 @@ public static class GenerateUI {
         Image fillImg = fill.AddComponent<Image>();
         fillImg.sprite = SpriteDatabase.Get(UISliceSprite.Circle256P2048);
         fillImg.type = Image.Type.Sliced;
-        fillImg.color = UIColors.ObjectActive;
 
         fill.AddComponent<Mask>().showMaskGraphic = true;
 
         GameObject changeUp = AddSmallChangedCircle(fillRect);
-        Image changeImgUp = changeUp.GetComponent<Image>();
-        changeImgUp.color = UIColors.ObjectBG;
+        Image changeUpImg = changeUp.GetComponent<Image>();
 
         UISlider slider = new(
             id,
@@ -187,7 +185,7 @@ public static class GenerateUI {
             label,
             valueText,
             changeImg,
-            changeImgUp,
+            changeUpImg,
             defaultValue,
             min,
             max,
@@ -301,7 +299,6 @@ public static class GenerateUI {
 
         Image triangleImage = triangle.AddComponent<Image>();
         triangleImage.sprite = SpriteDatabase.Get(UISprite.Triangle128);
-        triangleImage.color = UIColors.ObjectInactive;
 
         GameObject list = new("List");
         list.transform.SetParent(root.transform, false);
@@ -588,7 +585,9 @@ public static class GenerateUI {
 
         Image img = obj.AddComponent<Image>();
         img.sprite = SpriteDatabase.Get(UISprite.Circle256);
-        img.color = UIColors.ObjectInactive;
+        Color c = UIColors.ObjectActive;
+        c.a = 0f;
+        img.color = c;
 
         return obj;
     }

@@ -17,7 +17,12 @@ public abstract class UIObject {
             }
 
             _onlyModOn = value;
-            ApplyState(MainCore.IsModEnabled);
+            if(_onlyModOn) {
+                SetBlocked(!MainCore.IsModEnabled, true);
+                MainCore.OnModEnabledChanged += ApplyStateForAction;
+            } else {
+                MainCore.OnModEnabledChanged -= ApplyStateForAction;
+            }
         }
     }
 
@@ -30,29 +35,21 @@ public abstract class UIObject {
     }
     private Sequence blockSeq;
 
-    protected UIObject(string id, RectTransform rect, bool onlyModOn = false) {
+    protected UIObject(string id, RectTransform rect) {
         Id = id;
         Rect = rect;
-        _onlyModOn = onlyModOn;
-
-        MainCore.OnModEnabledChanged += ApplyState;
-
-        ApplyState(MainCore.IsModEnabled);
     }
 
-    private void ApplyState(bool enabled) {
-        if(_onlyModOn) {
-            SetBlocked(!enabled);
+    private void ApplyStateForAction(bool enabled) {
+        if(!_onlyModOn) {
             return;
         }
 
-        SetBlocked(false);
+        SetBlocked(!enabled);
     }
 
     public virtual void SetBlocked(bool blocked, bool noAnimate = false) {
-        if(CanvasGroup == null) {
-            return;
-        }
+        blockSeq?.Kill();
 
         float targetAlpha = blocked ? 0.4f : 1f;
 
@@ -60,19 +57,16 @@ public abstract class UIObject {
         CanvasGroup.blocksRaycasts = !blocked;
 
         if(noAnimate) {
-            blockSeq?.Kill();
             CanvasGroup.alpha = targetAlpha;
             return;
         }
-
-        blockSeq?.Kill();
 
         blockSeq = DOTween.Sequence().SetUpdate(true)
             .Join(DOTween.To(
                 () => CanvasGroup.alpha,
                 x => CanvasGroup.alpha = x,
                 targetAlpha,
-                0.15f
+                0.2f
             ).SetEase(Ease.OutSine));
     }
 }

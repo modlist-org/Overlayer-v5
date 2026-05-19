@@ -77,7 +77,7 @@ public class UIDropDown<T> : UIObject {
         Label.text = Display(Value);
 
         RebuildList();
-        UpdateVisual();
+        UpdateVisual(true);
     }
 
     public void Set(T value, bool invoke = true) {
@@ -120,8 +120,22 @@ public class UIDropDown<T> : UIObject {
 
     public void ToggleExpanded() => SetExpanded(!Expanded);
 
-    public void UpdateVisual() {
+    public void UpdateVisual(bool noAnimate = false) {
         triangleSeq?.Kill();
+        changeSeq?.Kill();
+
+        bool isDefault = DefaultValue == null || EqualityComparer<T>.Default.Equals(DefaultValue, Value);
+
+        if(noAnimate) {
+            TriangleRect.localRotation = Expanded ? Quaternion.Euler(0f, 0f, 180f) : Quaternion.identity;
+            TriangleImage.color = Expanded ? UIColors.ObjectActive : UIColors.ObjectInactive;
+
+            Color c = ChangedImage.color;
+            c.a = isDefault ? 0f : 1f;
+            ChangedImage.color = c;
+
+            return;
+        }
 
         triangleSeq = DOTween.Sequence().SetUpdate(true)
             .Join(
@@ -140,13 +154,6 @@ public class UIDropDown<T> : UIObject {
                     0.2f
                 ).SetEase(Ease.OutSine)
             );
-
-        changeSeq?.Kill();
-
-        bool isDefault =
-            DefaultValue == null ||
-            EqualityComparer<T>.Default.Equals(DefaultValue, Value);
-
         changeSeq = DOTween.Sequence().SetUpdate(true)
             .Append(DOTween.To(
                 () => ChangedImage.color.a,
@@ -157,8 +164,7 @@ public class UIDropDown<T> : UIObject {
                 },
                 isDefault ? 0f : 1f,
                 0.2f
-            ).SetEase(Ease.OutSine)
-        );
+            ).SetEase(Ease.OutSine));
     }
 
     public void RebuildList() {
