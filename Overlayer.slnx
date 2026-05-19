@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="Overlayer.csproj" />
+  <Project Path="Overlayer.Loader.ML\Overlayer.Loader.ML.csproj" />
+  <Project Path="Overlayer/Overlayer.csproj" />
 </Solution>
