@@ -5,18 +5,23 @@ namespace Overlayer.UI.Transition;
 
 internal class PageSwicher {
     private static Sequence pageSeq;
-    public static void SwitchPage(MenuState from, MenuState to) {
+    public static bool SwitchPage(int from, int to) {
         if(from == to) {
-            return;
+            return false;
         }
 
-        pageSeq?.Kill(true);
+        if(!UICore.Pages.TryGetValue(from, out RectTransform fromPage)) {
+            return false;
+        }
 
-        RectTransform fromPage = UICore.Pages[from];
-        RectTransform toPage = UICore.Pages[to];
+        if(!UICore.Pages.TryGetValue(to, out RectTransform toPage)) {
+            return false;
+        }
 
         CanvasGroup fromCg = fromPage.GetComponent<CanvasGroup>();
         CanvasGroup toCg = toPage.GetComponent<CanvasGroup>();
+
+        pageSeq?.Kill(true);
 
         toPage.anchoredPosition = new Vector2(600, 0);
         toCg.alpha = 0f;
@@ -31,12 +36,15 @@ internal class PageSwicher {
         pageSeq.Join(toPage.DOAnchorPosX(0f, 0.45f).SetEase(Ease.OutExpo).SetDelay(0.05f));
         pageSeq.Join(toCg.DOFade(1f, 0.3f));
 
-        pageSeq.OnComplete(() => {
+        pageSeq.OnComplete(() =>
+        {
             fromCg.interactable = false;
             fromCg.blocksRaycasts = false;
 
             toCg.interactable = true;
             toCg.blocksRaycasts = true;
         });
+
+        return true;
     }
 }

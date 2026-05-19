@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 
 namespace Overlayer.UI;
 
-public enum MenuState {
+public enum OriginalMenuState {
     Overlayer,
     Settings,
     Docs,
@@ -26,8 +26,8 @@ internal static class UICore {
     private static Canvas canvas;
     private static CanvasScaler canvasScaler;
 
-    internal static readonly Dictionary<MenuState, RectTransform> Pages = [];
-    public static MenuState CurrentMenuState = MenuState.Overlayer;
+    internal static readonly Dictionary<int, RectTransform> Pages = [];
+    public static int CurrentMenuState = (int)OriginalMenuState.Overlayer;
     public static readonly Vector2 ReferenceResolution = new(1920, 1080);
 
     public static void Initialize() {

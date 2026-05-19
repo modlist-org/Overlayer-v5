@@ -16,8 +16,8 @@ internal static class PageFactory {
         container.offsetMin = Vector2.zero;
         container.offsetMax = new Vector2(0, -60);
 
-        for(int i = 0; i < Enum.GetValues(typeof(MenuState)).Length; i++) {
-            MenuState type = (MenuState)i;
+        for(int i = 0; i < Enum.GetValues(typeof(OriginalMenuState)).Length; i++) {
+            OriginalMenuState type = (OriginalMenuState)i;
 
             GameObject obj = new($"Page{type}");
             obj.transform.SetParent(pagesContainer.transform, false);
@@ -35,15 +35,15 @@ internal static class PageFactory {
             cg.interactable = false;
             cg.blocksRaycasts = false;
 
-            UICore.Pages[type] = rt;
+            UICore.Pages[(int)type] = rt;
         }
 
         UICore.Pages[UICore.CurrentMenuState].GetComponent<CanvasGroup>().alpha = 1f;
         UICore.Pages[UICore.CurrentMenuState].GetComponent<CanvasGroup>().interactable = true;
         UICore.Pages[UICore.CurrentMenuState].GetComponent<CanvasGroup>().blocksRaycasts = true;
 
-        PageCredits.Create(UICore.Pages[MenuState.Credits]);
-        PageSettings.Create(UICore.Pages[MenuState.Settings]);
+        PageCredits.Create(UICore.Pages[(int)OriginalMenuState.Credits]);
+        PageSettings.Create(UICore.Pages[(int)OriginalMenuState.Settings]);
 
         return container;
     }
