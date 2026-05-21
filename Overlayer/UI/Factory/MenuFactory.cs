@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using Overlayer.Core;
-using Overlayer.Localization;
 using Overlayer.Resource;
+using Overlayer.Localization;
 using Overlayer.UI.Transition;
 using TMPro;
 using UnityEngine;
@@ -13,11 +13,12 @@ namespace Overlayer.UI.Factory;
 public static class MenuFactory {
     public static Action<int> OnStateChanged;
 
-    private sealed class MenuItem {
+    public sealed class MenuItem {
         public int state;
         public GameObject obj;
         public Image bg;
         public Sequence hoverSeq;
+        public TMP_Text label;
     }
 
     private static readonly List<MenuItem> items = [];
@@ -25,15 +26,27 @@ public static class MenuFactory {
     public static void CreateMenu(Transform parent) {
         items.Clear();
 
-        CreateItem(parent, "Overlayer", MainCore.Spr.Get(UISprite.Monitor128), 0);
-        CreateItem(parent, "Settings", MainCore.Spr.Get(UISprite.Gear128), 1);
-        CreateItem(parent, "Docs", MainCore.Spr.Get(UISprite.Book128), 2);
-        CreateItem(parent, "Credits", MainCore.Spr.Get(UISprite.Star128), 3);
+        var overlayer = CreateItem(parent, "Overlayer", MainCore.Spr.Get(UISprite.Monitor128), 0);
+        var settings = CreateItem(parent, "Settings", MainCore.Spr.Get(UISprite.Gear128), 1);
+        var docs = CreateItem(parent, "Docs", MainCore.Spr.Get(UISprite.Book128), 2);
+        var credits = CreateItem(parent, "Credits", MainCore.Spr.Get(UISprite.Star128), 3);
+
+        overlayer.label.gameObject.AddComponent<TextLocalization>()
+            .Init("OVERLAYER", "Overlayer");
+
+        settings.label.gameObject.AddComponent<TextLocalization>()
+            .Init("SETTINGS", "Settings");
+
+        docs.label.gameObject.AddComponent<TextLocalization>()
+            .Init("DOCS", "Docs");
+
+        credits.label.gameObject.AddComponent<TextLocalization>()
+            .Init("CREDITS", "Credits");
 
         ApplyState(UICore.CurrentMenuState);
     }
 
-    public static void CreateItem(Transform parent, string name, Sprite icon, int state) {
+    public static MenuItem CreateItem(Transform parent, string name, Sprite icon, int state) {
         GameObject item = new(name);
         item.transform.SetParent(parent, false);
 
@@ -77,12 +90,12 @@ public static class MenuFactory {
         label.alignment = TextAlignmentOptions.Left;
         label.verticalAlignment = VerticalAlignmentOptions.Middle;
         label.characterSpacing = -3f;
-        label.gameObject.AddComponent<TextLocalization>().Init(name.ToUpper(), name);
 
         MenuItem menuItem = new() {
             obj = item,
             bg = bg,
-            state = state
+            state = state,
+            label = label
         };
 
         items.Add(menuItem);
@@ -123,6 +136,8 @@ public static class MenuFactory {
         Add(EventTriggerType.PointerClick, () => {
             SetState(state);
         });
+
+        return menuItem;
     }
 
     private static void SetState(int to) {
@@ -148,12 +163,10 @@ public static class MenuFactory {
 
             bool selected = it.state == id;
 
-            Color target = selected
+            it.bg.DOKill();
+            it.bg.color = selected
                 ? UIColors.MenuSelected
                 : UIColors.MenuNormal;
-
-            it.bg.DOKill();
-            it.bg.color = target;
         }
     }
 }
