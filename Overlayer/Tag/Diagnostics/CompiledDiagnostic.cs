@@ -1,7 +1,20 @@
 ﻿namespace Overlayer.Tag.Diagnostics;
 
-public readonly struct CompileDiagnostic(DiagnosticId id, CompileSeverity severity, params object[] context) {
-    public readonly DiagnosticId Id = id;
-    public readonly CompileSeverity Severity = severity;
-    public readonly object[] Context = context;
+public readonly record struct CompileDiagnostic {
+    public DiagnosticId Id { get; }
+    public CompileSeverity Severity { get; }
+    public DiagnosticContext Context { get; }
+    public object[] Data { get; }
+
+    public CompileDiagnostic(
+        DiagnosticId id,
+        CompileSeverity severity,
+        DiagnosticContext context,
+        object[] data
+    ) {
+        Id = id;
+        Severity = severity;
+        Context = context;
+        Data = data;
+    }
 }

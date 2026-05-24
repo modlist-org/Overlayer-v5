@@ -1,21 +1,27 @@
 ﻿using Overlayer.Tag.Core;
 using Overlayer.Tag.Diagnostics;
 using Overlayer.Tag.Runtime;
+using Overlayer.TextEngine.Parse;
 using System.Linq.Expressions;
 
 namespace Overlayer.Tag.Compile;
 
 public static class Compiler {
-    public static CompiledPlaceholder Compile(TagCore tag, Placeholder placeholder) {
+    public static CompiledPlaceholder Compile(
+        TagCore tag,
+        ParsedTag parsed
+    ) {
         var diagnostics = new List<CompileDiagnostic>();
 
-        var sig = SignatureResolver.Resolve(tag, placeholder, diagnostics);
-        if(sig.State == CompileState.Error) {
-            return CompileResultFactory.Create(
-                EmptyDelegates.ReturnEmpty,
-                [.. diagnostics]
-            );
-        }
+        var placeholder = new Placeholder(parsed.Name, parsed.Args);
+
+        var context = new DiagnosticContext(
+            parsed.Name,
+            parsed.Index,
+            parsed.Length
+        );
+
+        var sig = SignatureResolver.Resolve(tag, placeholder, diagnostics, context);
 
         var expr = ExpressionBuilder.Build(tag, sig, diagnostics);
 

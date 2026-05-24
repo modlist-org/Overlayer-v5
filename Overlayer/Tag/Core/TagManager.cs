@@ -1,4 +1,5 @@
-﻿using Overlayer.Core;
+﻿using Overlayer.Compat.Interface;
+using Overlayer.Core;
 using System.Reflection;
 
 namespace Overlayer.Tag.Core;
@@ -20,8 +21,7 @@ public static class TagManager {
 
             MainCore.Logger.Msg($"[{nameof(TagManager)}] Initialization started");
 
-            _initTask = Task.Run(async () =>
-            {
+            _initTask = Task.Run(async () => {
                 try {
                     var list = await TagLoader.LoadAsync(asm);
 

@@ -4,7 +4,7 @@ using Overlayer.Tag.Diagnostics;
 namespace Overlayer.Tag.Compile;
 
 public static class SignatureResolver {
-    public static ResolvedSignature Resolve(TagCore tag, Placeholder placeholder, List<CompileDiagnostic> diag) {
+    public static ResolvedSignature Resolve(TagCore tag, Placeholder placeholder, List<CompileDiagnostic> diag, DiagnosticContext context) {
         string[] rawArgs = placeholder.Args ?? [];
         var parameters = tag.Parameters;
 
@@ -29,22 +29,22 @@ public static class SignatureResolver {
         }
 
         if(args.Length < minRequired) {
-            diag.Add(new(
+            diag.Add(new CompileDiagnostic(
                 DiagnosticId.ArgTooFew,
                 CompileSeverity.Error,
-                minRequired,
-                args.Length
+                context,
+                [minRequired, args.Length]
             ));
 
             return ResolvedSignature.Invalid;
         }
 
         if(args.Length > valueParamCount) {
-            diag.Add(new(
+            diag.Add(new CompileDiagnostic(
                 DiagnosticId.ArgTooMany,
                 CompileSeverity.Warning,
-                valueParamCount,
-                args.Length
+                context,
+                [valueParamCount, args.Length]
             ));
         }
 
@@ -53,8 +53,8 @@ public static class SignatureResolver {
                 diag.Add(new(
                     DiagnosticId.FormatFail,
                     CompileSeverity.Error,
-                    format,
-                    ex
+                    context,
+                    [format, ex]
                 ));
 
                 return ResolvedSignature.Invalid;
@@ -65,13 +65,11 @@ public static class SignatureResolver {
             try {
                 ArgConverter.Convert(args[i], parameters[i].ParameterType);
             } catch(Exception ex) {
-                diag.Add(new(
-                    DiagnosticId.ArgConvertFail,
+                diag.Add(new CompileDiagnostic(
+                DiagnosticId.ArgConvertFail,
                     CompileSeverity.Error,
-                    i,
-                    args[i],
-                    parameters[i].ParameterType.Name,
-                    ex.GetType().Name
+                    context,
+                    [i, args[i], parameters[i].ParameterType.Name]
                 ));
 
                 return ResolvedSignature.Invalid;

@@ -463,7 +463,8 @@
 		<Compile Include="Tag\Compile\SignatureResolver.cs" />
 		<Compile Include="Tag\Compile\Wrapper.cs" />
 		<Compile Include="Tag\Diagnostics\CompiledDiagnostic.cs" />
-		<Compile Include="Tag\Diagnostics\CompileFailure.cs" />
+		<Compile Include="Tag\Diagnostics\CompileResultFactory.cs" />
+		<Compile Include="Tag\Diagnostics\DiagnosticContext.cs" />
 		<Compile Include="Tag\Diagnostics\DiagnosticId.cs" />
 		<Compile Include="Tag\Runtime\CompiledPlaceholder.cs" />
 		<Compile Include="Tag\Diagnostics\CompileSeverity.cs" />
@@ -475,6 +476,10 @@
 		<Compile Include="Tag\Core\TagAttribute.cs" />
 		<Compile Include="Tag\Core\TagLoader.cs" />
 		<Compile Include="Tag\Core\TagManager.cs" />
+		<Compile Include="TextEngine\Core\TextEngineCore.cs" />
+		<Compile Include="TextEngine\Parse\ParsedTag.cs" />
+		<Compile Include="TextEngine\Parse\Parser.cs" />
+		<Compile Include="TextEngine\Runtime\CompiledSegment.cs" />
 		<Compile Include="UI\ColorPicker\ColorPicker.cs" />
 		<Compile Include="UI\Objects\Impl\UIButton.cs" />
 		<Compile Include="UI\Objects\Impl\UIDropdown.cs" />
