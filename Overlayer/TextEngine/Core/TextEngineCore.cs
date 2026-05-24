@@ -8,8 +8,6 @@ namespace Overlayer.TextEngine.Core;
 
 public sealed class TextEngineCore {
     private readonly object _lock = new();
-
-    private string text;
     private Task _compileTask;
 
     private volatile CompiledSegment[] segments;
@@ -18,13 +16,13 @@ public sealed class TextEngineCore {
     private int spinner;
 
     public string Text {
-        get => text;
+        get;
         set {
-            if(text == value) {
+            if(field == value) {
                 return;
             }
 
-            text = value;
+            field = value;
             StartCompile();
         }
     }
@@ -53,13 +51,13 @@ public sealed class TextEngineCore {
 
     private void CompileInternal() {
         try {
-            if(string.IsNullOrEmpty(text)) {
+            if(string.IsNullOrEmpty(Text)) {
                 segments = [];
                 state = TextEngineState.Ready;
                 return;
             }
 
-            var tags = Parser.Parse(text);
+            var tags = Parser.Parse(Text);
 
             if(tags.Count == 0) {
                 segments = [];
@@ -97,22 +95,22 @@ public sealed class TextEngineCore {
         var segs = segments;
 
         if(segs == null || segs.Length == 0) {
-            return text ?? string.Empty;
+            return Text ?? string.Empty;
         }
 
-        var sb = new StringBuilder(text.Length);
+        var sb = new StringBuilder(Text.Length);
         int last = 0;
 
         for(int i = 0; i < segs.Length; i++) {
             var s = segs[i];
 
-            sb.Append(text, last, s.Index - last);
+            sb.Append(Text, last, s.Index - last);
             sb.Append(s.Replacer.Get());
 
             last = s.Index + s.Length;
         }
 
-        sb.Append(text, last, text.Length - last);
+        sb.Append(Text, last, Text.Length - last);
 
         return sb.ToString();
     }
