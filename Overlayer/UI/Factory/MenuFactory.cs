@@ -43,7 +43,7 @@ public static class MenuFactory {
         credits.label.gameObject.AddComponent<TextLocalization>()
             .Init("CREDITS", "Credits");
 
-        ApplyState(UICore.CurrentMenuState);
+        ApplyState(UICore.CurrentMenuState, true);
     }
 
     public static MenuItem CreateItem(Transform parent, string name, Sprite icon, int state) {
@@ -153,18 +153,28 @@ public static class MenuFactory {
         OnStateChanged?.Invoke(to);
     }
 
-    private static void ApplyState(int id) {
+    private static void ApplyState(int id, bool noAnimate = false) {
         for(int i = 0; i < items.Count; i++) {
             var it = items[i];
 
             it.hoverSeq?.Kill();
+            it.bg.DOKill();
 
             bool selected = it.state == id;
 
-            it.bg.DOKill();
-            it.bg.color = selected
-                ? UIColors.MenuSelected
-                : UIColors.MenuNormal;
+            if(selected) {
+                if(noAnimate) {
+                    it.bg.color = UIColors.MenuSelected;
+                } else {
+                    it.bg.color = UIColors.MenuHighlight;
+
+                    it.bg.DOColor(UIColors.MenuSelected, 0.3f)
+                        .SetEase(Ease.OutSine)
+                        .SetUpdate(true);
+                }
+            } else {
+                it.bg.color = UIColors.MenuNormal;
+            }
         }
     }
 }
