@@ -47,7 +47,6 @@ public sealed class ResourceManager(Assembly assembly, string resourcePath) : ID
             }
 
             byte[] data = new byte[stream.Length];
-
             int offset = 0;
 
             while(offset < data.Length) {
@@ -77,13 +76,7 @@ public sealed class ResourceManager(Assembly assembly, string resourcePath) : ID
             return null;
         }
 
-        Texture2D texture = new(
-            2,
-            2,
-            TextureFormat.RGBA32,
-            false,
-            true
-        );
+        Texture2D texture = new(2, 2, TextureFormat.RGBA32, false, true);
 
         if(!texture.LoadImage(data)) {
             Object.Destroy(texture);
@@ -106,21 +99,17 @@ public sealed class ResourceManager(Assembly assembly, string resourcePath) : ID
             return null;
         }
 
-        Directory.CreateDirectory(
-            Path.GetDirectoryName(tempPath)
-        );
+        string directory = Path.GetDirectoryName(tempPath);
+        if(!string.IsNullOrEmpty(directory)) {
+            Directory.CreateDirectory(directory);
+        }
 
-        File.WriteAllBytes(
-            tempPath,
-            data
-        );
+        File.WriteAllBytes(tempPath, data);
 
         Font font = new(tempPath);
-
         TMP_FontAsset asset = TMP_FontAsset.CreateFontAsset(font);
 
         cache[path] = asset;
-
         return asset;
     }
 
@@ -129,12 +118,26 @@ public sealed class ResourceManager(Assembly assembly, string resourcePath) : ID
             return null;
         }
 
+        return GetInternal<T>(path, asset.ToString());
+    }
+
+    public T Get<T>(string path) where T : class {
+        if(string.IsNullOrWhiteSpace(path)) {
+            return null;
+        }
+
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        return GetInternal<T>(path, fileName);
+    }
+    public TMP_FontAsset GetFont(string path, string customTempPath) => LoadFont(path, customTempPath);
+    private T GetInternal<T>(string path, string assetNameForFont) where T : class {
         object result = null;
 
         if(typeof(T) == typeof(Texture2D)) {
             result = LoadTexture(path);
         } else if(typeof(T) == typeof(TMP_FontAsset)) {
-            result = LoadFont(path, Path.Combine(MainCore.Paths.TempPath, asset.ToString() + ".otf"));
+            string tempPath = Path.Combine(MainCore.Paths.TempPath, assetNameForFont + ".otf");
+            result = LoadFont(path, tempPath);
         }
 
         return result as T;

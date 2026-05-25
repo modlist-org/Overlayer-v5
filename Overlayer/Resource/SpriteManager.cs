@@ -32,28 +32,77 @@ public sealed class SpriteManager(ResourceManager resource) : IDisposable {
 
     private readonly Dictionary<object, Sprite> cache = [];
 
+    public static Sprite Create(Texture2D texture)
+        => texture == null ? null : Sprite.Create(
+            texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f)
+        );
+
+    public static Sprite CreateSliced(Texture2D texture, float ppui, Vector4 border)
+        => texture == null ? null : Sprite.Create(
+            texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f),
+            ppui,
+            0,
+            SpriteMeshType.FullRect,
+            border
+        );
+
+    public Sprite Get(string assetName) {
+        if(string.IsNullOrEmpty(assetName)) {
+            return null;
+        }
+
+        if(cache.TryGetValue(assetName, out Sprite sprite)) {
+            return sprite;
+        }
+
+        Texture2D tex = resource.Get<Texture2D>(assetName);
+        if(tex == null) {
+            return null;
+        }
+
+        sprite = Create(tex);
+        cache[assetName] = sprite;
+
+        return sprite;
+    }
+
+    public Sprite GetSliced(string assetName, float ppui, Vector4 border) {
+        if(string.IsNullOrEmpty(assetName)) {
+            return null;
+        }
+
+        object key = (assetName, ppui, border);
+
+        if(cache.TryGetValue(key, out Sprite sprite)) {
+            return sprite;
+        }
+
+        Texture2D tex = resource.Get<Texture2D>(assetName);
+        if(tex == null) {
+            return null;
+        }
+
+        sprite = CreateSliced(tex, ppui, border);
+        cache[key] = sprite;
+
+        return sprite;
+    }
+
     public Sprite Get(Asset asset) {
         if(cache.TryGetValue(asset, out Sprite sprite)) {
             return sprite;
         }
 
         Texture2D tex = resource.Get<Texture2D>(asset);
-
         if(tex == null) {
             return null;
         }
 
-        sprite = Sprite.Create(
-            tex,
-            new Rect(
-                0,
-                0,
-                tex.width,
-                tex.height
-            ),
-            new Vector2(0.5f, 0.5f)
-        );
-
+        sprite = Create(tex);
         cache[asset] = sprite;
 
         return sprite;
@@ -67,37 +116,17 @@ public sealed class SpriteManager(ResourceManager resource) : IDisposable {
         }
 
         Texture2D tex = resource.Get<Texture2D>(asset);
-
         if(tex == null) {
             return null;
         }
 
-        sprite = Sprite.Create(
-            tex,
-            new Rect(
-                0,
-                0,
-                tex.width,
-                tex.height
-            ),
-            new Vector2(0.5f, 0.5f),
-            ppui,
-            0,
-            SpriteMeshType.FullRect,
-            border
-        );
-
+        sprite = CreateSliced(tex, ppui, border);
         cache[key] = sprite;
 
         return sprite;
     }
 
-    public Sprite Get(UISprite sprite) {
-        return spriteMap.TryGetValue(
-            sprite,
-            out Asset asset
-        ) ? Get(asset) : null;
-    }
+    public Sprite Get(UISprite sprite) => spriteMap.TryGetValue(sprite, out Asset asset) ? Get(asset) : null;
 
     public Sprite Get(UISliceSprite sprite) {
         if(!sliceMap.TryGetValue(sprite, out (Asset asset, float ppui) data)) {
