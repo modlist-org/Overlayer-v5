@@ -16,6 +16,17 @@ Custom Unity Overlay UI mode for users!
 
 </div>
 
+# 🛠️ Installation
+
+## 🍉 MelonLoader
+
+> [!IMPORTANT]
+> You must extract the contents of the zip file **directly into your game's root directory** (where the game `.exe` lives). Ensure the internal folders line up perfectly with your existing game directory structure.
+
+1. Download the specific `Overlayer-ML` zip file that matches your system architecture (e.g., `Overlayer-ML-win64.zip`).
+2. Open your game's installation root folder.
+3. Extract all contents of the downloaded zip file directly into that folder.
+
 # ⚖️ Licenses
 ### Logo
 - The Overlayer logo is based on a modified version of the Google V8 logo.
@@ -23,4 +34,5 @@ Custom Unity Overlay UI mode for users!
   - Original project/source: [Google V8](https://v8.dev/)
 - Overlayer is not affiliated with, endorsed by, or associated with Google or the V8 project.
 
-It is currently under development!
+> [!NOTE]
+> Overlayer V5 is currently under active development!
