@@ -27,6 +27,11 @@ Custom Unity Overlay UI mode for users!
 2. Open your game's installation root folder.
 3. Extract all contents of the downloaded zip file directly into that folder.
 
+# 🧩 [Modules](https://github.com/modlist-org/Overlayer-v5.Module)
+Overlayer v5 utilizes runtime-loaded modules to support specific game features and tag functionalities tailored for each title. To access these game-specific enhancements and tags, you need to install the appropriate module from the repository.
+> [!NOTE]
+> Modules require this base mod environment to function and cannot run standalone.
+
 # ⚖️ Licenses
 ### Logo
 - The Overlayer logo is based on a modified version of the Google V8 logo.
