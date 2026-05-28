@@ -422,8 +422,12 @@
 		<Compile Include="Core\Service\PathService.cs" />
 		<Compile Include="Core\Service\UIService.cs" />
 		<Compile Include="IO\CoreSettings.cs" />
+		<Compile Include="IO\Interface\ISettingsDefault.cs" />
 		<Compile Include="IO\Interface\ISettingsFile.cs" />
+		<Compile Include="IO\IOUtils.cs" />
+		<Compile Include="IO\Overlay\CanvasSettings.cs" />
 		<Compile Include="IO\SettingsFile.cs" />
+		<Compile Include="IO\UnityComponent\RectTransformSettings.cs" />
 		<Compile Include="Localization\TextLocalization.cs" />
 		<Compile Include="Localization\Translator.cs" />
 		<Compile Include="Async\MainThread.cs" />

@@ -22,28 +22,12 @@ public sealed class CoreSettings : ISettingsFile {
         };
     }
 
-    public void Deserialize(
-        JToken token
-    ) {
-        Active = Read(token, nameof(Active), Active);
-        Language = Read(token, nameof(Language), Language);
-        ShowOnStartup = Read(token, nameof(ShowOnStartup), ShowOnStartup);
-        Tooltip = Read(token, nameof(Tooltip), Tooltip);
-        MiddleClickToDefault = Read(token, nameof(MiddleClickToDefault), MiddleClickToDefault);
-        UIScale = Read(token, nameof(UIScale), UIScale);
-    }
-
-    private static T Read<T>(JToken token, string key, T fallback) {
-        var value = token[key];
-
-        if(value == null) {
-            return fallback;
-        }
-
-        try {
-            return value.Value<T>();
-        } catch {
-            return fallback;
-        }
+    public void Deserialize(JToken token) {
+        Active = IOUtils.Read(token, nameof(Active), Active);
+        Language = IOUtils.Read(token, nameof(Language), Language);
+        ShowOnStartup = IOUtils.Read(token, nameof(ShowOnStartup), ShowOnStartup);
+        Tooltip = IOUtils.Read(token, nameof(Tooltip), Tooltip);
+        MiddleClickToDefault = IOUtils.Read(token, nameof(MiddleClickToDefault), MiddleClickToDefault);
+        UIScale = IOUtils.Read(token, nameof(UIScale), UIScale);
     }
 }

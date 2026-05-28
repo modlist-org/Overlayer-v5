@@ -11,7 +11,7 @@ public sealed class SettingsFile<T>(string path) where T : class, ISettingsFile,
 
     private readonly object saveLock = new();
 
-    private CancellationTokenSource saveCts;
+    private CancellationTokenSource saveCts;    
 
     private bool saveScheduled;
 
