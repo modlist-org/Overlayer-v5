@@ -428,5 +428,8 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
+#InteliJ
+.idea
+
 # Overlayer
 Directory.Build.props
