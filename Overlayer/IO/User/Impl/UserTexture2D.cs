@@ -43,7 +43,7 @@ public class UserTexture2D : UserResourceBase<Texture2D> {
 
             return Result.Success;
         } catch(Exception e) {
-            MainCore.Logger.Err($"{nameof(UserResourceManager)} Texture load failed: {e}");
+            MainCore.Logger.Err($"[{nameof(UserTexture2D)}] Texture load failed: {e}");
             return Result.Failed;
         }
     }

@@ -15,5 +15,17 @@ public abstract class UserResourceBase<T> {
         return false;
     }
 
+    public bool TryGetKey(T value, out string key) {
+        foreach(var (k, (_, v)) in Cache) {
+            if(EqualityComparer<T>.Default.Equals(v, value)) {
+                key = k;
+                return true;
+            }
+        }
+
+        key = default;
+        return false;
+    }
+
     public abstract void Dispose();
 }

@@ -115,6 +115,29 @@ public static class IOUtils {
 
     public static JArray Write(Vector4 v) => new(v.x, v.y, v.z, v.w);
     #endregion
+    #region Rect
+    public static Rect Read(JToken token, string key, Rect fallback) {
+        var value = token[key];
+
+        if(value == null || value is not JArray arr || arr.Count < 4) {
+            return fallback;
+        }
+
+        try {
+            return new Rect(
+                (float)arr[0],
+                (float)arr[1],
+                (float)arr[2],
+                (float)arr[3]
+            );
+        } catch {
+            return fallback;
+        }
+    }
+
+    public static JArray Write(Rect rect)
+        => new(rect.x, rect.y, rect.width, rect.height);
+    #endregion
     #region Quaternion
     public static Quaternion Read(JToken token, string key, Quaternion fallback) {
         var value = token[key];
