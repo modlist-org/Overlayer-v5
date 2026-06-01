@@ -152,6 +152,8 @@ public sealed class OverlayerRuntime {
 
             OverlayCore.Initialize(RootObject);
 
+            // OvObject Test Logic Begin
+            
             var canvas = OverlayCore.CreateOvCanvas();
 
             var obj = canvas.CreateOvObject();
@@ -163,6 +165,8 @@ public sealed class OverlayerRuntime {
             obj.ApplyComponent();
             MainCore.Logger.Msg((obj.Config.ImageConfig == null).ToString());
             obj.ApplyConfig();
+            
+            // Test End
 
             Logger.Msg("Mod Enabled");
         } else {
