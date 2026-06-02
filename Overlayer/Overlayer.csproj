@@ -21,9 +21,6 @@
 		<Reference Include="0Harmony">
 			<HintPath>$(GamePath)/MelonLoader/net35/0Harmony.dll</HintPath>
 		</Reference>
-		<Reference Include="Accessibility">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Accessibility.dll</HintPath>
-		</Reference>
 		<Reference Include="Assembly-CSharp-firstpass">
 			<HintPath>$(GamePath)/$(GameData)/Managed/Assembly-CSharp-firstpass.dll</HintPath>
 		</Reference>
@@ -57,23 +54,8 @@
 		<Reference Include="I18N.West">
 			<HintPath>$(GamePath)/$(GameData)/Managed/I18N.West.dll</HintPath>
 		</Reference>
-		<Reference Include="Mono.Data.Sqlite">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Mono.Data.Sqlite.dll</HintPath>
-		</Reference>
-		<Reference Include="Mono.Posix">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Mono.Posix.dll</HintPath>
-		</Reference>
-		<Reference Include="Mono.WebBrowser">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Mono.WebBrowser.dll</HintPath>
-		</Reference>
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(GamePath)/$(GameData)/Managed/Newtonsoft.Json.dll</HintPath>
-		</Reference>
-		<Reference Include="Novell.Directory.Ldap">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Novell.Directory.Ldap.dll</HintPath>
-		</Reference>
-		<Reference Include="Ookii.Dialogs">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Ookii.Dialogs.dll</HintPath>
 		</Reference>
 		<Reference Include="Purchasing.Common">
 			<HintPath>$(GamePath)/$(GameData)/Managed/Purchasing.Common.dll</HintPath>
@@ -83,12 +65,6 @@
 		</Reference>
 		<Reference Include="Rewired_Core">
 			<HintPath>$(GamePath)/$(GameData)/Managed/Rewired_Core.dll</HintPath>
-		</Reference>
-		<Reference Include="Rewired_Windows">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Rewired_Windows.dll</HintPath>
-		</Reference>
-		<Reference Include="Rewired_Windows_Functions">
-			<HintPath>$(GamePath)/$(GameData)/Managed/Rewired_Windows_Functions.dll</HintPath>
 		</Reference>
 		<Reference Include="Unity.Addressables">
 		  <HintPath>$(GamePath)/$(GameData)/Managed/Unity.Addressables.dll</HintPath>
@@ -177,9 +153,6 @@
 		<Reference Include="UnityEngine.AnimationModule">
 		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.AnimationModule.dll</HintPath>
 		</Reference>
-		<Reference Include="UnityEngine.ARModule">
-		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.ARModule.dll</HintPath>
-		</Reference>
 		<Reference Include="UnityEngine.AssetBundleModule">
 		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.AssetBundleModule.dll</HintPath>
 		</Reference>
@@ -239,9 +212,6 @@
 		</Reference>
 		<Reference Include="UnityEngine.LocalizationModule">
 		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.LocalizationModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.NVIDIAModule">
-		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.NVIDIAModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.ParticleSystemModule">
 		  <HintPath>$(GamePath)/$(GameData)/Managed/UnityEngine.ParticleSystemModule.dll</HintPath>
