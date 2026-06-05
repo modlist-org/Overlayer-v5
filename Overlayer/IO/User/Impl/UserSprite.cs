@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Overlayer.IO.User.Impl;
 
-public class UserSprite : UserResourceBase<(Sprite sprite, string textureKey, SpriteSettings settings)>, ISettingsFile { 
+public class UserSprite : UserResourceBase<(Sprite sprite, string textureKey, SpriteSettings settings)>, ISettingsFile {
     public enum Result {
         Success,
         KeyAlreadyExists,

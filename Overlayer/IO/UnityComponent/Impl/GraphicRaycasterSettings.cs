@@ -10,23 +10,23 @@ public class GraphicRaycasterSettings : UnityComponentSettingsBase, ICopyable<Gr
 
     public override bool ToUnity(GameObject target) {
         var com = target.GetComponent<GraphicRaycaster>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         com.enabled = Enabled;
-        
+
         return true;
     }
 
     public override bool FromUnity(GameObject source) {
         var com = source.GetComponent<GraphicRaycaster>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         Enabled = com.enabled;
-        
+
         return true;
     }
 

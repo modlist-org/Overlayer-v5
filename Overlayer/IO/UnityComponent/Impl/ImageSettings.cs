@@ -16,26 +16,26 @@ public class ImageSettings : UnityComponentSettingsBase, ICopyable<ImageSettings
 
     public override bool ToUnity(GameObject target) {
         var com = target.GetComponent<Image>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         com.color = Color;
         com.sprite = UserResourceManager.Spr.TryGet(SpriteKey, out var value) ? value.sprite : null;
         com.preserveAspect = PreserveAspect;
         com.type = Type;
         com.fillMethod = FillMethod;
         com.fillAmount = FillAmount;
-        
+
         return true;
     }
 
     public override bool FromUnity(GameObject source) {
         var com = source.GetComponent<Image>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         Color = com.color;
         if(com.sprite != null) {
             UserResourceManager.Spr.TryGetKey(
@@ -49,7 +49,7 @@ public class ImageSettings : UnityComponentSettingsBase, ICopyable<ImageSettings
         Type = com.type;
         FillMethod = com.fillMethod;
         FillAmount = com.fillAmount;
-        
+
         return true;
     }
 

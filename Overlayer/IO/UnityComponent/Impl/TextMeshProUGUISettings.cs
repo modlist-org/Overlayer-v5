@@ -26,10 +26,10 @@ public class TextMeshProUGUISettings : UnityComponentSettingsBase, ICopyable<Tex
 
     public override bool ToUnity(GameObject target) {
         var com = target.GetComponent<TextMeshProUGUI>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         com.text = Text;
         com.colorGradient = Color;
         com.fontSize = FontSize;
@@ -55,7 +55,7 @@ public class TextMeshProUGUISettings : UnityComponentSettingsBase, ICopyable<Tex
 
     public override bool FromUnity(GameObject source) {
         var com = source.GetComponent<TextMeshProUGUI>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
 

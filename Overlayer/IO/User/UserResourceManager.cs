@@ -42,7 +42,7 @@ public static class UserResourceManager {
         }
 
         if(path.StartsWith(ModPathToken, StringComparison.OrdinalIgnoreCase)) {
-            var relative = path.Substring(ModPathToken.Length).TrimStart('/', '\\');
+            var relative = path[ModPathToken.Length..].TrimStart('/', '\\');
 
             return Path.Combine(MainCore.Paths.RootPath, relative);
         }

@@ -4,7 +4,6 @@ using Overlayer.Compat;
 using Overlayer.Compat.Interface;
 using Overlayer.Core.Service;
 using Overlayer.IO;
-using Overlayer.IO.UnityComponent.Impl;
 using Overlayer.IO.User;
 using Overlayer.Overlay;
 using Overlayer.Patch.Safe;
@@ -12,8 +11,6 @@ using Overlayer.Resource;
 using Overlayer.Tag.Core;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Overlayer.Core;

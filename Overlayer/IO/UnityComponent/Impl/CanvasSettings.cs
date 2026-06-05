@@ -1,9 +1,8 @@
 using Newtonsoft.Json.Linq;
 using Overlayer.IO.Interface;
-using Overlayer.IO.UnityComponent;
 using UnityEngine;
 
-namespace Overlayer.IO.Overlay;
+namespace Overlayer.IO.UnityComponent.Impl;
 
 public class CanvasSettings : UnityComponentSettingsBase, ICopyable<CanvasSettings> {
     public RenderMode RenderMode = RenderMode.ScreenSpaceOverlay;
@@ -12,27 +11,27 @@ public class CanvasSettings : UnityComponentSettingsBase, ICopyable<CanvasSettin
 
     public override bool ToUnity(GameObject target) {
         var com = target.GetComponent<Canvas>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         com.renderMode = RenderMode;
         com.sortingOrder = SortingOrder;
         com.pixelPerfect = PixelPerfect;
-        
+
         return true;
     }
 
     public override bool FromUnity(GameObject source) {
         var com = source.GetComponent<Canvas>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         RenderMode = com.renderMode;
         SortingOrder = com.sortingOrder;
         PixelPerfect = com.pixelPerfect;
-        
+
         return true;
     }
 

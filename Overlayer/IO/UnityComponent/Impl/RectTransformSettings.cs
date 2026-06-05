@@ -84,7 +84,8 @@ public class RectTransformSettings : UnityComponentSettingsBase, ICopyable<RectT
             obj[nameof(AnchorMax)] = IOUtils.Write(AnchorMax);
             obj[nameof(OffsetMin)] = IOUtils.Write(OffsetMin);
             obj[nameof(OffsetMax)] = IOUtils.Write(OffsetMax);
-        } return obj;
+        }
+        return obj;
     }
 
     public override void Deserialize(JToken token) {

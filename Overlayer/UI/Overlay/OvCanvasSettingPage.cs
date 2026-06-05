@@ -1,11 +1,11 @@
-﻿using Overlayer.Core;
+﻿using DG.Tweening;
+using Overlayer.Core;
 using Overlayer.Overlay;
 using Overlayer.Resource;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Utility;
 using TMPro;
 using UnityEngine;
-using DG.Tweening;
 using static UnityEngine.EventSystems.PointerEventData;
 
 namespace Overlayer.UI.Overlay;
@@ -113,9 +113,7 @@ public class OvCanvasSettingPage : IDisposable {
         } else {
             CanvasGroup.DOFade(1f, 0.25f).SetUpdate(true)
                 .SetEase(Ease.OutCubic)
-                .OnComplete(() => {
-                    CanvasGroup.blocksRaycasts = true;
-                });
+                .OnComplete(() => CanvasGroup.blocksRaycasts = true);
         }
     }
 
@@ -129,9 +127,7 @@ public class OvCanvasSettingPage : IDisposable {
         } else {
             CanvasGroup.DOFade(0f, 0.25f).SetUpdate(true)
                 .SetEase(Ease.OutCubic)
-                .OnComplete(() => {
-                    GameObject.SetActive(false);
-                });
+                .OnComplete(() => GameObject.SetActive(false));
         }
     }
 

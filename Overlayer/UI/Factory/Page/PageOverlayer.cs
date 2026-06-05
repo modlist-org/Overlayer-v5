@@ -4,8 +4,8 @@ using Overlayer.Localization;
 using Overlayer.Overlay;
 using Overlayer.Resource;
 using Overlayer.UI.Generator;
-using Overlayer.UI.Utility;
 using Overlayer.UI.Overlay;
+using Overlayer.UI.Utility;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -78,7 +78,6 @@ internal static class PageOverlayer {
         });
 
         MainCore.OnModEnabledChanged += (isEnabled, isDispose) => ToggleUIStateByMod(isEnabled);
-
 
         if(!MainCore.IsModEnabled) {
             ToggleUIStateByMod(false);
@@ -279,11 +278,13 @@ internal static class PageOverlayer {
         return go;
     }
     private static void FadeCanvasGroup(CanvasGroup cg, float targetAlpha, bool setActive, bool noAnimate = false) {
-        if(cg == null)
+        if(cg == null) {
             return;
+        }
 
-        if(setActive)
+        if(setActive) {
             cg.gameObject.SetActive(true);
+        }
 
         cg.DOKill();
 

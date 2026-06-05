@@ -15,7 +15,7 @@ public class Texture2DSettings() : ISettingsFile, ICopyable<Texture2DSettings> {
     }
 
     public void Deserialize(JToken token) {
-        MipChain = IOUtils.Read(token, nameof(MipChain),  MipChain);
+        MipChain = IOUtils.Read(token, nameof(MipChain), MipChain);
         Linear = IOUtils.Read(token, nameof(Linear), Linear);
     }
 

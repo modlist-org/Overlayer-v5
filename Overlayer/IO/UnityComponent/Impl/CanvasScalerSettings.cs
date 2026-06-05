@@ -16,10 +16,10 @@ public class CanvasScalerSettings : UnityComponentSettingsBase, ICopyable<Canvas
 
     public override bool ToUnity(GameObject target) {
         var com = target.GetComponent<CanvasScaler>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         com.uiScaleMode = UiScaleMode;
         com.referenceResolution = ReferenceResolution;
         com.matchWidthOrHeight = MatchWidthOrHeight;
@@ -32,10 +32,10 @@ public class CanvasScalerSettings : UnityComponentSettingsBase, ICopyable<Canvas
 
     public override bool FromUnity(GameObject source) {
         var com = source.GetComponent<CanvasScaler>();
-        if (com == null) {
+        if(com == null) {
             return false;
         }
-        
+
         UiScaleMode = com.uiScaleMode;
         ReferenceResolution = com.referenceResolution;
         MatchWidthOrHeight = com.matchWidthOrHeight;
