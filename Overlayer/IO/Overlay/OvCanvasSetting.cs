@@ -1,12 +1,19 @@
 using Newtonsoft.Json.Linq;
 using Overlayer.IO.Interface;
 using Overlayer.IO.UnityComponent.Impl;
+using UnityEngine;
 
 namespace Overlayer.IO.Overlay;
 
 public sealed class OvCanvasSettings : ISettingsFile {
     public string Name = "OvCanvas";
-    public RectTransformSettings RectTransformConfig = new();
+    public RectTransformSettings RectTransformConfig = new() {
+        AnchorMin = Vector2.zero,
+        AnchorMax = Vector2.one,
+        OffsetMin = Vector2.zero,
+        OffsetMax = Vector2.zero,
+        Pivot = new Vector2(0.5f, 0.5f)
+    };
     public CanvasSettings CanvasConfig = new();
     public CanvasScalerSettings CanvasScalerConfig = new();
     public GraphicRaycasterSettings GraphicRaycasterConfig = new();

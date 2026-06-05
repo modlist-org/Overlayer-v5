@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Overlayer.IO.UnityComponent.Impl;
 
@@ -7,23 +8,23 @@ public class GraphicRaycasterSettings : UnityComponentSettingsBase {
     public bool Enabled = true;
 
     public override bool ToUnity(GameObject target) {
-        var com = target.GetComponent<GraphicRaycasterSettings>();
+        var com = target.GetComponent<GraphicRaycaster>();
         if (com == null) {
             return false;
         }
         
-        com.Enabled = Enabled;
+        com.enabled = Enabled;
         
         return true;
     }
 
     public override bool FromUnity(GameObject source) {
-        var com = source.GetComponent<GraphicRaycasterSettings>();
+        var com = source.GetComponent<GraphicRaycaster>();
         if (com == null) {
             return false;
         }
         
-        Enabled = com.Enabled;
+        Enabled = com.enabled;
         
         return true;
     }

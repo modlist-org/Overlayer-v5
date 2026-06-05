@@ -18,6 +18,7 @@ public sealed class OvObject {
     public OvObject() {
         GameObject = new GameObject("OvObject", typeof(RectTransform));
         RectTransform = GameObject.GetComponent<RectTransform>();
+
         ApplyConfig();
     }
 
@@ -39,79 +40,61 @@ public sealed class OvObject {
     }
 
     public void ApplyComponent() {
-        var tmp = GameObject.GetComponent<TextMeshProUGUI>();
-        if (Config.TextConfig != null) {
-            if (tmp == null) {
-                GameObject.AddComponent<TextMeshProUGUI>();
-            }
-        } else {
-            if (tmp != null) {
-                Object.Destroy(tmp);
-            }
+        if(GameObject == null) {
+            return;
         }
-        var img = GameObject.GetComponent<Image>();
-        if (Config.ImageConfig != null) {
-            if (img == null) {
-                GameObject.AddComponent<Image>();
-            }
-        } else {
-            if (img != null) {
-                Object.Destroy(img);
-            }
-        }
-        var msk = GameObject.GetComponent<Mask>();
-        if (Config.MaskConfig != null) {
-            if (msk == null) {
-                GameObject.AddComponent<Mask>();
-            }
-        } else {
-            if (msk != null) {
-                Object.Destroy(msk);
-            }
-        }
-        var sdw = GameObject.GetComponent<Shadow>();
-        if (Config.ShadowConfig != null) {
-            if (sdw == null) {
-                GameObject.AddComponent<Shadow>();
-            }
-        } else {
-            if (sdw != null) {
-                Object.Destroy(sdw);
-            }
-        }
-        var rm2 = GameObject.GetComponent<RectMask2D>();
-        if (Config.HasRectMask2D) {
-            if (rm2 == null) {
-                GameObject.AddComponent<RectMask2D>();
-            }
-        } else {
-            if (rm2 != null) {
-                Object.Destroy(rm2);
-            }
-        }
-        var oln = GameObject.GetComponent<Outline>();
-        if(Config.OutlineConfig != null) {
-            if(oln == null) {
-                GameObject.AddComponent<Outline>();
-            }
-        } else {
-            if(oln != null) {
-                Object.Destroy(oln);
-            }
-        }
+
+        EnsureComponent<TextMeshProUGUI>(Config.TextConfig != null);
+        EnsureComponent<Image>(Config.ImageConfig != null);
+        EnsureComponent<Mask>(Config.MaskConfig != null);
+        EnsureComponent<Shadow>(Config.ShadowConfig != null);
+        EnsureComponent<RectMask2D>(Config.HasRectMask2D);
+        EnsureComponent<Outline>(Config.OutlineConfig != null);
     }
 
-    public void AttachChild(OvObject child) {
-        if(child == null || child.Parent == this) {
+    private T EnsureComponent<T>(bool enabled) where T : Component {
+        if(GameObject == null) {
+            return null;
+        }
+
+        var comp = GameObject.GetComponent<T>();
+
+        if(!enabled) {
+            if(comp != null) {
+                Object.Destroy(comp);
+            }
+
+            return null;
+        }
+
+        if(comp == null) {
+            comp = GameObject.AddComponent<T>();
+        }
+
+        return comp;
+    }
+
+    public void Attach(OvObject child) {
+        if(child == null || child.GameObject == null) {
+            return;
+        }
+
+        if(child == this) {
+            return;
+        }
+
+        if(child.Parent == this) {
             return;
         }
 
         child.Parent?.Children.Remove(child);
-
         child.Parent = this;
-        child.GameObject.transform.SetParent(RectTransform, false);
 
-        Children.Add(child);
+        if(!Children.Contains(child)) {
+            Children.Add(child);
+        }
+
+        child.GameObject.transform.SetParent(RectTransform, false);
         child.GameObject.transform.SetSiblingIndex(Children.Count - 1);
     }
 
@@ -120,10 +103,13 @@ public sealed class OvObject {
             return;
         }
 
-        Parent.Children.Remove(this);
+        var oldParent = Parent;
         Parent = null;
+        oldParent.Children.Remove(this);
 
-        GameObject.transform.SetParent(null, false);
+        if(GameObject != null && OverlayCore.Transform != null) {
+            GameObject.transform.SetParent(OverlayCore.Transform, false);
+        }
     }
 
     public void SetChildIndex(OvObject child, int index) {

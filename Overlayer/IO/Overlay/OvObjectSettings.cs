@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Overlayer.IO.Interface;
 using Overlayer.IO.UnityComponent.Impl;
-using Unity.Profiling.LowLevel.Unsafe;
 namespace Overlayer.IO.Overlay;
 
 public sealed class OvObjectSettings : ISettingsFile {

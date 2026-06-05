@@ -4,14 +4,16 @@ using Overlayer.Compat;
 using Overlayer.Compat.Interface;
 using Overlayer.Core.Service;
 using Overlayer.IO;
+using Overlayer.IO.UnityComponent.Impl;
 using Overlayer.IO.User;
 using Overlayer.Overlay;
 using Overlayer.Patch.Safe;
 using Overlayer.Resource;
 using Overlayer.Tag.Core;
 using System.Reflection;
-using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Overlayer.Core;
@@ -156,28 +158,49 @@ public sealed class OverlayerRuntime {
             
             var canvas = OverlayCore.CreateOvCanvas();
 
-            var obj = canvas.CreateOvObject(new IO.Overlay.OvObjectSettings() {
-                RectTransformConfig = new() {
-                    SizeDelta = new Vector2(200, 200),
-                },
-                TextConfig = new(),
-                ImageConfig = new(),
-                OutlineConfig = new(),
-            });
+            var obj = canvas.CreateOvObject();
+
+            obj.Config.RectTransformConfig = new() {
+                Mode = RectTransformSettings.RectMode.CenterFixed,
+                SizeDelta = new Vector2(200, 200),
+                Anchor = new Vector2(0.5f, 0.5f),
+                AnchoredPosition = Vector2.zero,
+                Pivot = new Vector2(0.5f, 0.5f)
+            };
+
+            obj.Config.ImageConfig = new() {
+                Color = Color.blue
+            };
+
+            obj.Config.OutlineConfig = new() {
+                EffectColor = Color.red,
+                EffectDistance = new Vector2(2, -2)
+            };
+
             obj.ApplyComponent();
             obj.ApplyConfig();
-            
-            /* Fuck
-            [ERROR] [Overlayer] System.NullReferenceException: Object reference not set to an instance of an object
-            at Overlayer.IO.UnityComponent.Impl.ImageSettings.ToUnity (UnityEngine.GameObject target) [0x00008] in <f64de5634531445fa16ca2041a434909>:0 
-            at Overlayer.Overlay.OvObject.ApplyConfig () [0x00061] in <f64de5634531445fa16ca2041a434909>:0 
-            at Overlayer.Core.OverlayerRuntime.SetModEnabled (System.Boolean enabled, System.Boolean isDispose) [0x0012e] in <f64de5634531445fa16ca2041a434909>:0 
-            at Overlayer.Core.OverlayerRuntime.Initialize () [0x000b9] in <f64de5634531445fa16ca2041a434909>:0 
-            at Overlayer.Core.MainCore.Initialize (Overlayer.Compat.Interface.IOverlayerHost host) [0x00021] in <f64de5634531445fa16ca2041a434909>:0 
-            at Overlayer.Loader.ML.Loader.OnInitializeMelon () [0x00001] in <760fe7bc661f443fa2dae6bde9ae6513>:0 
-            at MelonLoader.MelonBase.LoaderInitialized () [0x00000] in /home/runner/work/MelonLoader/MelonLoader/MelonLoader/Melons/MelonBase.cs:474 
-            */
-            
+
+            var textObj = new OvObject();
+            obj.Attach(textObj);
+
+            textObj.Config.RectTransformConfig = new() {
+                Mode = RectTransformSettings.RectMode.Stretch,
+                AnchorMin = Vector2.zero,
+                AnchorMax = Vector2.one,
+                OffsetMin = Vector2.zero,
+                OffsetMax = Vector2.zero
+            };
+
+            textObj.Config.TextConfig = new() {
+                Text = "Hello, Overlayer!",
+                FontSize = 48,
+                Color = Color.white,
+                Alignment = TMPro.TextAlignmentOptions.TopLeft
+            };
+
+            textObj.ApplyComponent();
+            textObj.ApplyConfig();
+
             // Test End
 
             Logger.Msg("Mod Enabled");

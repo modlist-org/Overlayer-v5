@@ -1,4 +1,5 @@
 using Overlayer.IO.Overlay;
+using Overlayer.IO.UnityComponent.Impl;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -22,16 +23,13 @@ public class OvCanvas {
         Canvas = GameObject.GetComponent<Canvas>();
         CanvasScaler = GameObject.GetComponent<CanvasScaler>();
         GraphicRaycaster = GameObject.GetComponent<GraphicRaycaster>();
+
         ApplyConfig();
     }
 
-    public OvObject CreateOvObject(OvObjectSettings config = null) {
-        var obj = new OvObject {
-            Config = config ?? new OvObjectSettings()
-        };
-        obj.GameObject.transform.SetParent(RectTransform, false);
-        OvObjects.Add(obj);
-
+    public OvObject CreateOvObject() {
+        var obj = new OvObject();
+        Attach(obj);
         return obj;
     }
 
@@ -40,7 +38,43 @@ public class OvCanvas {
         Config.RectTransformConfig.ToUnity(GameObject);
         Config.CanvasConfig.ToUnity(GameObject);
         Config.CanvasScalerConfig.ToUnity(GameObject);
-        Config.RectTransformConfig.ToUnity(GameObject);
+        Config.GraphicRaycasterConfig.ToUnity(GameObject);
+    }
+
+    public void Attach(OvObject obj) {
+        if(obj == null) {
+            return;
+        }
+
+        if(obj.GameObject == null) {
+            return;
+        }
+
+        if(obj.GameObject.transform.parent == RectTransform) {
+            return;
+        }
+
+        obj.GameObject.transform.SetParent(RectTransform, false);
+
+        if(!OvObjects.Contains(obj)) {
+            OvObjects.Add(obj);
+        }
+    }
+
+    public void Detach(OvObject obj) {
+        if(obj == null) {
+            return;
+        }
+
+        if(obj.GameObject == null) {
+            return;
+        }
+
+        if(!OvObjects.Remove(obj)) {
+            return;
+        }
+
+        obj.GameObject.transform.SetParent(OverlayCore.Transform, false);
     }
 
     public void SetOrder(int index) {
