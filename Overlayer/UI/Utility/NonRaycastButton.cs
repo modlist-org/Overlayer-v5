@@ -27,9 +27,9 @@ public class NonRaycastButton
 
         entry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((e) =>
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-            (e) => OnClickInternal()
+                (_) => OnClickInternal()
 #if ML && IL2CPP
             ))
 #endif
