@@ -1,4 +1,7 @@
-﻿using DG.Tweening;
+﻿using GTweens.Easings;
+using GTweens.Extensions;
+using GTweens.Tweens;
+using Overlayer.Core;
 using UnityEngine;
 
 public class UIScrollController : MonoBehaviour {
@@ -11,13 +14,13 @@ public class UIScrollController : MonoBehaviour {
     public float dragToScrollRatio = 1f;
 
     public float scrollDuration = 0.2f;
-    public Ease scrollEase = Ease.OutCirc;
+    public Easing scrollEase = Easing.OutCirc;
 
     private bool rightDragging;
     private Vector2 lastMousePos;
 
     private float targetY;
-    private Tween scrollTween;
+    private GTween scrollTween;
 
     private void Awake() {
         if(content != null) {
@@ -99,19 +102,19 @@ public class UIScrollController : MonoBehaviour {
     private void ApplyTween() {
         scrollTween?.Kill();
 
-        scrollTween = DOTween.To(
-                () => content.anchoredPosition.y,
-                x => {
-                    content.anchoredPosition = new Vector2(
-                        content.anchoredPosition.x,
-                        x
-                    );
-                },
-                targetY,
-                scrollDuration
-            )
-            .SetEase(scrollEase)
-            .SetUpdate(true);
+        scrollTween = GTweenExtensions.Tween(
+            () => content.anchoredPosition.y,
+            x => {
+                content.anchoredPosition = new Vector2(
+                    content.anchoredPosition.x,
+                    x
+                );
+            },
+            targetY,
+            scrollDuration
+        )
+        .SetEasing(scrollEase);
+        MainCore.TC.Play(scrollTween);
     }
 
     public void SetContent(RectTransform content, RectTransform viewport) {

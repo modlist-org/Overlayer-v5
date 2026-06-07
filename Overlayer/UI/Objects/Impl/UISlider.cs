@@ -1,7 +1,17 @@
-using DG.Tweening;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using GTweens.Tweens;
+using Overlayer.Core;
+using GTweens.Extensions;
+
+using GTweens.Builders;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Objects.Impl;
 
@@ -33,8 +43,8 @@ public class UISlider : UIObject {
     public Image ChangedImage { get; }
     public Image ChangedUpImage { get; }
 
-    private Sequence fillSeq;
-    private Sequence changeSeq;
+    private GTween fillSeq;
+    private GTween changeSeq;
 
     public UISlider(
         string id,
@@ -132,41 +142,47 @@ public class UISlider : UIObject {
             return;
         }
 
-        fillSeq = DOTween.Sequence().SetUpdate(true).Join(
-             DOTween.To(
-                 () => FillRect.anchorMax.x,
-                 x => {
-                     Vector2 anchor = FillRect.anchorMax;
-                     anchor.x = x;
-                     FillRect.anchorMax = anchor;
-                 },
-                 t,
-                 0.6f
-             ).SetEase(Ease.OutExpo)
-         );
+        fillSeq = GTweenSequenceBuilder.New()
+            .Join(
+                GTweenExtensions.Tween(
+                    () => FillRect.anchorMax.x,
+                    x => {
+                        Vector2 anchor = FillRect.anchorMax;
+                        anchor.x = x;
+                        FillRect.anchorMax = anchor;
+                    },
+                    t,
+                    0.6f
+                ).SetEasing(Easing.OutExpo)
+            ).Build();
+        MainCore.TC.Play(fillSeq);
 
-        changeSeq = DOTween.Sequence().SetUpdate(true)
-            .Join(DOTween.To(
-                () => ChangedImage.color.a,
-                x => {
-                    Color c = ChangedImage.color;
-                    c.a = x;
-                    ChangedImage.color = c;
-                },
-                changeAlpha,
-                0.2f
-            ).SetEase(Ease.OutSine))
-            .Join(DOTween.To(
-                () => ChangedUpImage.color.a,
-                x => {
-                    Color c = ChangedUpImage.color;
-                    c.a = x;
-                    ChangedUpImage.color = c;
-                },
-                changeAlpha,
-                0.2f
-            ).SetEase(Ease.OutSine)
-        );
+        changeSeq = GTweenSequenceBuilder.New()
+            .Join(
+                GTweenExtensions.Tween(
+                    () => ChangedImage.color.a,
+                    x => {
+                        Color c = ChangedImage.color;
+                        c.a = x;
+                        ChangedImage.color = c;
+                    },
+                    changeAlpha,
+                    0.2f
+                ).SetEasing(Easing.OutSine)
+            )
+            .Join(
+                GTweenExtensions.Tween(
+                    () => ChangedUpImage.color.a,
+                    x => {
+                        Color c = ChangedUpImage.color;
+                        c.a = x;
+                        ChangedUpImage.color = c;
+                    },
+                    changeAlpha,
+                    0.2f
+                ).SetEasing(Easing.OutSine)
+            ).Build();
+        MainCore.TC.Play(changeSeq);
     }
 
     public void OnDrag(float normalizedValue) => SetNormalized(normalizedValue, true);

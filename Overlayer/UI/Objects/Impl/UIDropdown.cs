@@ -1,13 +1,23 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Resource;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Utility;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using GTweens.Tweens;
+using Overlayer.Tween;
+
+using GTweens.Builders;
+using GTweens.Easings;
+using GTweens.Extensions;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Objects.Impl;
 
@@ -36,8 +46,8 @@ public class UIDropDown<T> : UIObject {
 
     public Action OnLayoutChanged;
 
-    private Sequence triangleSeq;
-    private Sequence changeSeq;
+    private GTween triangleSeq;
+    private GTween changeSeq;
 
     public UIDropDown(
         string id,
@@ -138,25 +148,18 @@ public class UIDropDown<T> : UIObject {
             return;
         }
 
-        triangleSeq = DOTween.Sequence().SetUpdate(true)
+        triangleSeq = GTweenSequenceBuilder.New()
             .Join(
-                TriangleRect.DORotate(
-                    Expanded
-                        ? new Vector3(0f, 0f, 180f)
-                        : Vector3.zero,
-                    0.4f
-                ).SetEase(Ease.OutBack)
+                TriangleRect.GTRotate(Expanded ? new Vector3(0f, 0f, 180f) : Vector3.zero, 0.4f)
+                    .SetEasing(Easing.OutBack)
             )
             .Join(
-                TriangleImage.DOColor(
-                    Expanded
-                        ? UIColors.ObjectActive
-                        : UIColors.ObjectInactive,
-                    0.2f
-                ).SetEase(Ease.OutSine)
-            );
-        changeSeq = DOTween.Sequence().SetUpdate(true)
-            .Append(DOTween.To(
+                TriangleImage.GTColor(Expanded ? UIColors.ObjectActive : UIColors.ObjectInactive, 0.2f)
+                    .SetEasing(Easing.OutSine)
+            ).Build();
+        MainCore.TC.Play(triangleSeq);
+        changeSeq = GTweenSequenceBuilder.New()
+            .Append(GTweenExtensions.Tween(
                 () => ChangedImage.color.a,
                 x => {
                     Color c = ChangedImage.color;
@@ -165,7 +168,8 @@ public class UIDropDown<T> : UIObject {
                 },
                 isDefault ? 0f : 1f,
                 0.2f
-            ).SetEase(Ease.OutSine));
+            ).SetEasing(Easing.OutSine)).Build();
+        MainCore.TC.Play(changeSeq);
     }
 
     public void RebuildList() {
@@ -194,28 +198,22 @@ public class UIDropDown<T> : UIObject {
 
             EventTrigger trigger = row.AddComponent<EventTrigger>();
 
-            Sequence hoverSeq = null;
+            GTween hoverSeq = null;
 
             UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
                 hoverSeq?.Kill();
-
-                hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
-                    rowImage.DOColor(
-                        UIColors.ObjectActive,
-                        0.12f
-                    ).SetEase(Ease.OutSine)
-                );
+                hoverSeq = GTweenSequenceBuilder.New()
+                    .Append(rowImage.GTColor(UIColors.ObjectActive, 0.12f).SetEasing(Easing.OutSine))
+                    .Build();
+                MainCore.TC.Play(hoverSeq);
             }, trigger);
 
             UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
                 hoverSeq?.Kill();
-
-                hoverSeq = DOTween.Sequence().SetUpdate(true).Append(
-                    rowImage.DOColor(
-                        Color.clear,
-                        0.12f
-                    ).SetEase(Ease.OutSine)
-                );
+                hoverSeq = GTweenSequenceBuilder.New()
+                    .Append(rowImage.GTColor(Color.clear, 0.12f).SetEasing(Easing.OutSine))
+                    .Build();
+                MainCore.TC.Play(hoverSeq);
             }, trigger);
 
             UnityUtils.AddEvent(EventTriggerType.PointerClick, e => {

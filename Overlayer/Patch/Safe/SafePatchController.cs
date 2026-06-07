@@ -8,15 +8,15 @@ public static class SafePatchController {
     public static void Add(SafeConditionalPatch patch) {
         if(!patches.Contains(patch)) {
             patches.Add(patch);
-            MainCore.Logger.Msg($"[{nameof(SafePatchController)}] {patch.GetType().Name}");
+            MainCore.Log.Msg($"[{nameof(SafePatchController)}] {patch.GetType().Name}");
         } else {
-            MainCore.Logger.Wrn($"[{nameof(SafePatchController)}] Patch skipped. Already registered: {patch.GetType().Name}");
+            MainCore.Log.Wrn($"[{nameof(SafePatchController)}] Patch skipped. Already registered: {patch.GetType().Name}");
         }
     }
 
     public static void Remove(SafeConditionalPatch patch) {
         if(!patches.Contains(patch)) {
-            MainCore.Logger.Wrn($"[{nameof(SafePatchController)}] Cannot remove patch. Not found in controller: {patch.GetType().Name}");
+            MainCore.Log.Wrn($"[{nameof(SafePatchController)}] Cannot remove patch. Not found in controller: {patch.GetType().Name}");
             return;
         }
 
@@ -26,7 +26,7 @@ public static class SafePatchController {
 
         patches.Remove(patch);
 
-        MainCore.Logger.Msg($"[{nameof(SafePatchController)}] unloaded patch: {patch.GetType().Name}");
+        MainCore.Log.Msg($"[{nameof(SafePatchController)}] unloaded patch: {patch.GetType().Name}");
     }
 
     public static T Get<T>() where T : SafeConditionalPatch {

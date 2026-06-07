@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+﻿using Overlayer.Async;
 using Overlayer.Core;
 using Overlayer.Localization;
 using Overlayer.Resource;
@@ -6,11 +6,21 @@ using Overlayer.UI.Factory;
 using Overlayer.UI.Factory.Page;
 using Overlayer.UI.Objects;
 using Overlayer.UI.Utility;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
+using GTweens.Tweens;
+using GTweens.Builders;
+using GTweens.Extensions;
+using Overlayer.Tween;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI;
 
@@ -45,7 +55,7 @@ public static class UICore {
         canvasScaler = canvasObj.AddComponent<CanvasScaler>();
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         //canvasScaler.referenceResolution = new(1920, 1080);
-        PanelScale = MainCore.Config.UIScale;
+        PanelScale = MainCore.Conf.UIScale;
         canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         canvasScaler.matchWidthOrHeight = 0.5f;
 
@@ -72,9 +82,125 @@ public static class UICore {
 
         TextLocalization.RefreshAll();
 
-        if(MainCore.Config.ShowOnStartup) {
+        if(MainCore.Conf.IsFirstRun) {
+            MainCore.Conf.IsFirstRun = false;
+            MainCore.ConfMgr.Save();
+            MakeFirstRunHelper();
+        }
+
+        if(MainCore.Conf.ShowOnStartup) {
             Open(true);
         }
+    }
+
+    private static bool firstRunHelperActivated = false;
+    private static GameObject firstRunCanvasObj;
+    private static Image firstRunHelperImage;
+    private static TextMeshProUGUI firstRunHelperText;
+    private static GTween firstRunHelperImageSequence;
+    private static GTween secondRunHelperTextSequence;
+
+    private static void MakeFirstRunHelper() {
+        Task.Run(async () => {
+            await Task.Delay(4000);
+            MainThread.Enqueue(() => {
+                firstRunHelperActivated = true;
+
+                firstRunCanvasObj = new GameObject("FirstRunHelperCanvas");
+                firstRunCanvasObj.transform.SetParent(MainCore.Root.transform, false);
+
+                firstRunCanvasObj.AddComponent<RectTransform>();
+
+                var canvas = firstRunCanvasObj.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 32767;
+
+                var scaler = firstRunCanvasObj.AddComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920, 1080);
+                scaler.matchWidthOrHeight = 0.5f;
+
+                var frh = new GameObject("FirstRunHelper");
+                var frhRect = frh.AddComponent<RectTransform>();
+                frh.transform.SetParent(firstRunCanvasObj.transform, false);
+
+                frhRect.anchorMin = new Vector2(0f, 0f);
+                frhRect.anchorMax = new Vector2(1f, 0f);
+                frhRect.pivot = new Vector2(0.5f, 0f);
+                frhRect.offsetMin = new Vector2(0f, 0f);
+                frhRect.offsetMax = new Vector2(0f, 4f);
+
+                firstRunHelperImage = frh.AddComponent<Image>();
+                firstRunHelperImage.raycastTarget = false;
+                firstRunHelperImage.color = new Color(1f, 1f, 1f, 0f);
+
+                var frhTextObj = new GameObject("Text");
+                var frhTextRect = frhTextObj.AddComponent<RectTransform>();
+                frhTextObj.transform.SetParent(frh.transform, false);
+
+                var tmp = frhTextObj.AddComponent<TextMeshProUGUI>();
+                tmp.fontSize = 22f;
+                tmp.color = Color.white;
+                tmp.alignment = TextAlignmentOptions.Bottom;
+                tmp.text = "";
+                tmp.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
+
+                frhTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+                frhTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+                frhTextRect.anchoredPosition = new Vector2(0f, 6f);
+                frhTextRect.sizeDelta = new Vector2(1000f, 50f);
+                frhTextRect.pivot = new Vector2(0.5f, 0f);
+
+                firstRunHelperText = tmp;
+                firstRunHelperImageSequence = GTweenSequenceBuilder.New()
+                    .Append(firstRunHelperImage.GTAlpha(1.6f, 0.1f).SetEasing(Easing.OutSine))
+                    .Append(firstRunHelperImage.GTAlpha(0.04f, 1f).SetEasing(Easing.OutSine))
+                    .Build()
+                    .SetLoops(-1);
+
+                string fullText = "Press Alt + ` (BackQuote, left of 1 key)";
+                secondRunHelperTextSequence = GTweenSequenceBuilder.New()
+                    .Append(GTweenExtensions.Tween(
+                        () => 0,
+                        x => firstRunHelperText.text = fullText[..x],
+                        fullText.Length,
+                        1.4f
+                    ))
+                    .Build();
+
+                MainCore.TC.Play(firstRunHelperImageSequence);
+                MainCore.TC.Play(secondRunHelperTextSequence);
+            });
+        });
+    }
+
+    private static void EndFirstRunHelper() {
+        firstRunHelperImageSequence?.Kill();
+        secondRunHelperTextSequence?.Kill();
+
+        firstRunHelperText.text = "";
+        string endText = "Great Job!";
+
+        var sequence = GTweenSequenceBuilder.New()
+            .Append(firstRunHelperImage.GTAlpha(1.0f, 0.2f).SetEasing(Easing.OutSine))
+            .Join(GTweenExtensions.Tween(
+                () => 0,
+                x => firstRunHelperText.text = endText[..x],
+                endText.Length,
+                0.8f
+            ).SetEasing(Easing.Linear))
+            .AppendTime(3.0f)
+            .Append(firstRunHelperImage.GTAlpha(0f, 2.0f))
+            .Join(firstRunHelperText.GTAlpha(0f, 2.0f))
+
+            .AppendCallback(() => {
+                if(firstRunCanvasObj != null) {
+                    UnityEngine.Object.Destroy(firstRunCanvasObj);
+                }
+            })
+            .Build();
+
+        MainCore.TC.Play(sequence);
     }
 
     public static RectTransform Panel;
@@ -206,22 +332,26 @@ public static class UICore {
             powerRect.sizeDelta = new Vector2(0f, 60f);
             powerRect.pivot = new Vector2(0.5f, 0f);
             var powerBg = power.AddComponent<Image>();
-            powerBg.color = MainCore.Config.Active
+            powerBg.color = MainCore.Conf.Active
                     ? new(0, 0, 0, 0.1f)
                     : UIColors.SoftRed;
             var btn = power.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
-            Sequence powerSeq = null;
+            GTween powerSeq = null;
             btn.onClick.AddListener(() => {
-                bool enable = MainCore.Config.Active = !MainCore.Config.Active;
+                bool enable = MainCore.Conf.Active = !MainCore.Conf.Active;
                 MainCore.SetModEnabled(enable);
 
                 Color target = enable
-                    ? new(0f, 0f, 0f, 0.1f)
+                    ? new Color(0f, 0f, 0f, 0.1f)
                     : UIColors.SoftRed;
 
                 powerSeq?.Kill();
-                powerSeq = DOTween.Sequence().SetUpdate(true).Append(powerBg.DOColor(target, 0.32f).SetEase(Ease.OutExpo));
+                powerSeq = GTweenSequenceBuilder.New()
+                    .Append(powerBg.GTColor(target, 0.32f).SetEasing(Easing.OutExpo))
+                    .Build();
+
+                MainCore.TC.Play(powerSeq);
             });
             GameObject powerIcon = new("PowerIcon");
             powerIcon.transform.SetParent(powerRect, false);
@@ -291,10 +421,10 @@ public static class UICore {
 
         {
             // Root button
-            GameObject close = new("Close", typeof(RectTransform));
+            GameObject close = new("Close");
             close.transform.SetParent(topBar.transform, false);
 
-            var closeRect = close.GetComponent<RectTransform>();
+            var closeRect = close.AddComponent<RectTransform>();
             closeRect.anchorMin = new(1, 0.5f);
             closeRect.anchorMax = new(1, 0.5f);
             closeRect.pivot = new(1, 0.5f);
@@ -353,8 +483,8 @@ public static class UICore {
     private static float holdStartTime = 0f;
     private static bool holdingToggle = false;
 
-    private static Tweener panelTweener;
-    private static Sequence resetSequence;
+    private static GTween panelTweener;
+    private static GTween resetSequence;
 
     private static bool isOpen = false;
 
@@ -362,8 +492,8 @@ public static class UICore {
     public static Vector2 LastPanelSize;
 
     public static Vector2 DefaultPanelSize => new(
-        Mathf.Min(1280f / MainCore.Config.UIScale, Screen.width / MainCore.Config.UIScale),
-        Mathf.Min(720f / MainCore.Config.UIScale, Screen.height / MainCore.Config.UIScale)
+        Mathf.Min(1280f / MainCore.Conf.UIScale, Screen.width / MainCore.Conf.UIScale),
+        Mathf.Min(720f / MainCore.Conf.UIScale, Screen.height / MainCore.Conf.UIScale)
     );
 
     public static void HandleUpdate() {
@@ -444,8 +574,15 @@ public static class UICore {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        panelTweener?.Kill(true);
-        resetSequence?.Kill(true);
+        if(panelTweener != null) {
+            panelTweener.Complete();
+            panelTweener.Kill();
+        }
+
+        if(resetSequence != null) {
+            resetSequence.Complete();
+            resetSequence.Kill();
+        }
 
         if(noAnimate) {
             Panel.anchoredPosition = LastPanelPosition;
@@ -462,10 +599,14 @@ public static class UICore {
 
         canvasObj.SetActive(true);
 
-        panelTweener = Panel
-            .DOAnchorPos(LastPanelPosition, 0.1f)
-            .SetEase(Ease.OutExpo)
-            .SetUpdate(true);
+        panelTweener = Panel.GTAnchorPos(LastPanelPosition, 0.1f)
+            .SetEasing(Easing.OutExpo);
+        MainCore.TC.Play(panelTweener);
+
+        if(firstRunHelperActivated) {
+            firstRunHelperActivated = false;
+            EndFirstRunHelper();
+        }
     }
 
     public static void Close(bool noAnimate = false) {
@@ -485,8 +626,15 @@ public static class UICore {
             0f
         );
 
-        panelTweener?.Kill(true);
-        resetSequence?.Kill(true);
+        if(panelTweener != null) {
+            panelTweener.Complete();
+            panelTweener.Kill();
+        }
+
+        if(resetSequence != null) {
+            resetSequence.Complete();
+            resetSequence.Kill();
+        }
 
         if(noAnimate) {
             canvasObj.SetActive(false);
@@ -496,10 +644,10 @@ public static class UICore {
         Vector2 targetPos = GetRandomOffscreenPosition();
 
         panelTweener = Panel
-            .DOAnchorPos(targetPos, 0.1f)
-            .SetEase(Ease.OutExpo)
-            .OnComplete(() => canvasObj.SetActive(false))
-            .SetUpdate(true);
+            .GTAnchorPos(targetPos, 0.1f)
+            .SetEasing(Easing.OutExpo)
+            .OnComplete(() => canvasObj.SetActive(false));
+        MainCore.TC.Play(panelTweener);
     }
 
     public static void Toggle(bool noAnimate = false) {
@@ -525,13 +673,16 @@ public static class UICore {
             return;
         }
 
-        resetSequence = DOTween.Sequence().SetUpdate(true)
-            .Join(Panel.DOAnchorPos(LastPanelPosition, 0.26f).SetEase(Ease.OutExpo))
-            .Join(Panel.DOSizeDelta(LastPanelSize, 0.26f).SetEase(Ease.OutExpo));
+        resetSequence = GTweenSequenceBuilder.New()
+            .Append(Panel.GTAnchorPos(LastPanelPosition, 0.26f).SetEasing(Easing.OutExpo))
+            .Join(Panel.GTSizeDelta(LastPanelSize, 0.26f).SetEasing(Easing.OutExpo))
+            .Build();
+
+        MainCore.TC.Play(resetSequence);
     }
 
     private static bool isMenuOpen = false;
-    private static Sequence menuSequence;
+    private static GTween menuSequence;
 
     public static void OpenMenu() {
         menuSequence?.Kill();
@@ -542,15 +693,12 @@ public static class UICore {
         menuCanvasGroup.interactable = true;
         menuCanvasGroup.blocksRaycasts = true;
 
-        menuSequence = DOTween.Sequence().SetUpdate(true)
-            .Join(Menu.DOAnchorPos(Vector2.zero, 0.6f).SetEase(Ease.OutExpo))
-            .Join(menuCanvasGroup.DOFade(1f, 0.4f).SetEase(Ease.OutSine))
-            .Join(DOTween.To(
-                () => Page.offsetMin,
-                x => Page.offsetMin = x,
-                new(MENU_WIDTH, 0),
-                0.6f
-            ).SetEase(Ease.OutExpo));
+        menuSequence = GTweenSequenceBuilder.New()
+            .Join(Menu.GTAnchorPos(Vector2.zero, 0.6f).SetEasing(Easing.OutExpo))
+            .Join(menuCanvasGroup.GTFade(1f, 0.4f).SetEasing(Easing.OutSine))
+            .Join(Page.GTOffsetMin(new Vector2(MENU_WIDTH, 0), 0.6f).SetEasing(Easing.OutExpo))
+            .Build();
+        MainCore.TC.Play(menuSequence);
 
         isMenuOpen = true;
     }
@@ -561,15 +709,12 @@ public static class UICore {
         menuCanvasGroup.interactable = false;
         menuCanvasGroup.blocksRaycasts = false;
 
-        menuSequence = DOTween.Sequence().SetUpdate(true)
-            .Join(Menu.DOAnchorPos(new(-MENU_WIDTH, 0), 0.4f).SetEase(Ease.OutExpo))
-            .Join(menuCanvasGroup.DOFade(0f, 0.3f).SetEase(Ease.OutSine))
-            .Join(DOTween.To(
-                    () => Page.offsetMin,
-                    x => Page.offsetMin = x,
-                    new(0, 0),
-                    0.4f
-                ).SetEase(Ease.OutExpo));
+        menuSequence = GTweenSequenceBuilder.New()
+            .Join(Menu.GTAnchorPos(new Vector2(-MENU_WIDTH, 0), 0.4f).SetEasing(Easing.OutExpo))
+            .Join(menuCanvasGroup.GTFade(0f, 0.3f).SetEasing(Easing.OutSine))
+            .Join(Page.GTOffsetMin(new Vector2(0, 0), 0.4f).SetEasing(Easing.OutExpo))
+            .Build();
+        MainCore.TC.Play(menuSequence);
 
         isMenuOpen = false;
     }

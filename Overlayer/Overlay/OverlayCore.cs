@@ -43,7 +43,7 @@ public static class OverlayCore {
 
         foreach(var file in files) {
             var wrapper = new SettingsFile<OvCanvas>(file);
-            
+
             if(wrapper.Load()) {
                 var canvas = wrapper.Data;
                 canvas.RectTransform.SetParent(Transform, false);
@@ -69,7 +69,7 @@ public static class OverlayCore {
                 wrapper.Save();
             }
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(OverlayCore)}] Failed to save all canvases: {e}");
+            MainCore.Log.Err($"[{nameof(OverlayCore)}] Failed to save all canvases: {e}");
         }
     }
 

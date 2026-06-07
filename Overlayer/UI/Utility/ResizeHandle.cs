@@ -65,7 +65,7 @@ public class ResizeHandle
             or ResizeHandleType.TopRight
             or ResizeHandleType.BottomRight) {
             float newWidth = Mathf.Max(
-                MIN_WIDTH / MainCore.Config.UIScale,
+                MIN_WIDTH / MainCore.Conf.UIScale,
                 startSize.x + delta.x
             );
 
@@ -80,7 +80,7 @@ public class ResizeHandle
             or ResizeHandleType.TopLeft
             or ResizeHandleType.BottomLeft) {
             float newWidth = Mathf.Max(
-                MIN_WIDTH / MainCore.Config.UIScale,
+                MIN_WIDTH / MainCore.Conf.UIScale,
                 startSize.x - delta.x
             );
 
@@ -95,7 +95,7 @@ public class ResizeHandle
             or ResizeHandleType.TopLeft
             or ResizeHandleType.TopRight) {
             float newHeight = Mathf.Max(
-                MIN_HEIGHT / MainCore.Config.UIScale,
+                MIN_HEIGHT / MainCore.Conf.UIScale,
                 startSize.y + delta.y
             );
 
@@ -110,7 +110,7 @@ public class ResizeHandle
             or ResizeHandleType.BottomLeft
             or ResizeHandleType.BottomRight) {
             float newHeight = Mathf.Max(
-                MIN_HEIGHT / MainCore.Config.UIScale,
+                MIN_HEIGHT / MainCore.Conf.UIScale,
                 startSize.y - delta.y
             );
 

@@ -2,10 +2,15 @@ using Newtonsoft.Json.Linq;
 using Overlayer.IO.Interface;
 using Overlayer.IO.Overlay;
 using Overlayer.TextEngine.Core;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.Overlay;
 
@@ -20,12 +25,9 @@ public sealed class OvObject : ISettingsFile {
     public OvObjectSettings Config = new();
 
     public OvObject() {
-        GameObject = new GameObject("OvObject",
-            typeof(RectTransform),
-            typeof(CanvasGroup)
-        );
-        RectTransform = GameObject.GetComponent<RectTransform>();
-        CanvasGroup = GameObject.GetComponent<CanvasGroup>();
+        GameObject = new GameObject("OvObject");
+        RectTransform = GameObject.AddComponent<RectTransform>();
+        CanvasGroup = GameObject.AddComponent<CanvasGroup>();
 
         ApplyConfig();
     }

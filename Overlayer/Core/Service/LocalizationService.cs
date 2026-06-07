@@ -10,7 +10,6 @@ public sealed class LocalizationService(
     SettingsFile<CoreSettings> configFile,
     OverlayerLogger logger
 ) : IRuntimeService {
-
     public Translator Translator { get; } = new();
 
     public void Initialize() {

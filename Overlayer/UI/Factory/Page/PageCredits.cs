@@ -1,8 +1,13 @@
 ﻿using Overlayer.Core;
 using Overlayer.Resource;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Factory.Page;
 

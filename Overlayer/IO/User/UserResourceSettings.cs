@@ -20,7 +20,7 @@ public sealed class UserResourceSettings : ISettingsFile, IDisposable {
 
     public void Deserialize(JToken token) {
         if(token is not JObject obj) {
-            MainCore.Logger.Wrn($"[{nameof(UserResourceSettings)}] Deserialize failed: token is not JObject");
+            MainCore.Log.Wrn($"[{nameof(UserResourceSettings)}] Deserialize failed: token is not JObject");
             return;
         }
 

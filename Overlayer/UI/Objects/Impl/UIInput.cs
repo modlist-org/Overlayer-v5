@@ -1,7 +1,16 @@
-﻿using DG.Tweening;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using GTweens.Tweens;
+using GTweens.Extensions;
+using GTweens.Easings;
+using GTweens.Builders;
+using Overlayer.Core;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Objects.Impl;
 
@@ -21,10 +30,10 @@ public sealed class UIInput : UIObject {
 
     private readonly List<GlyphSnapshot> glyphCache = [];
 
-    private Tween changeTween;
-    private Tween caretTween;
-    private Tween placeholderTween;
-    private Tween iconTween;
+    private GTween changeTween;
+    private GTween caretTween;
+    private GTween placeholderTween;
+    private GTween iconTween;
 
     public UIInput(
         string id,
@@ -42,7 +51,7 @@ public sealed class UIInput : UIObject {
         IconImage = iconImage;
         ChangedImage = changedImage;
         DefaultValue = defaultValue;
-        Value = value ?? string.Empty;
+        Value = value;
         OnChanged = onChanged;
 
         RegisterTick();
@@ -86,7 +95,10 @@ public sealed class UIInput : UIObject {
     }
 
     public void UpdateVisual(bool noAnimate = false) {
-        changeTween?.Kill(true);
+        if(changeTween != null) {
+            changeTween.Complete();
+            changeTween.Kill();
+        }
 
         float target = (DefaultValue != null && DefaultValue != Value) ? 1f : 0f;
 
@@ -97,7 +109,7 @@ public sealed class UIInput : UIObject {
             return;
         }
 
-        changeTween = DOTween.To(
+        changeTween = GTweenExtensions.Tween(
             () => ChangedImage.color.a,
             x => {
                 Color c = ChangedImage.color;
@@ -107,8 +119,8 @@ public sealed class UIInput : UIObject {
             target,
             0.2f
         )
-        .SetEase(Ease.OutSine)
-        .SetUpdate(true);
+        .SetEasing(Easing.OutSine);
+        MainCore.TC.Play(changeTween);
     }
 
     private void SetupInputField() {
@@ -131,14 +143,13 @@ public sealed class UIInput : UIObject {
         if(focused) {
             caretTween?.Kill();
             if(caretLooping) {
-                caretTween = CreateCaretLoop(UIColors.ObjectActive);
+                caretTween = CreateCaretLoop();
                 return;
             }
 
             caretLooping = true;
-            caretTween = DOTween.Sequence()
-                .SetUpdate(true)
-                .Append(DOTween.To(
+            caretTween = GTweenSequenceBuilder.New()
+                .Append(GTweenExtensions.Tween(
                     () => InputField.caretColor.a,
                     x => {
                         var c = UIColors.ObjectActive;
@@ -147,11 +158,11 @@ public sealed class UIInput : UIObject {
                     },
                     1f,
                     0.2f
-                ).SetEase(Ease.OutSine))
+                ).SetEasing(Easing.OutSine))
                 .AppendCallback(() => {
                     caretTween?.Kill();
-                    caretTween = CreateCaretLoop(UIColors.ObjectActive);
-                });
+                    caretTween = CreateCaretLoop();
+                }).Build();
 
             return;
         }
@@ -163,7 +174,7 @@ public sealed class UIInput : UIObject {
         caretLooping = false;
 
         caretTween?.Kill();
-        caretTween = DOTween.To(
+        caretTween = GTweenExtensions.Tween(
             () => InputField.caretColor.a,
             x => {
                 var c = InputField.caretColor;
@@ -172,15 +183,13 @@ public sealed class UIInput : UIObject {
             },
             0f,
             0.3f
-        ).SetEase(Ease.OutSine);
+        ).SetEasing(Easing.OutSine);
+        MainCore.TC.Play(caretTween);
     }
 
-    private Tween CreateCaretLoop(Color baseColor) {
-        return DOTween.Sequence()
-            .SetUpdate(true)
-            .SetLoops(-1, LoopType.Restart)
-
-            .Append(DOTween.To(
+    private GTween CreateCaretLoop() {
+        return GTweenSequenceBuilder.New()
+            .Append(GTweenExtensions.Tween(
                 () => InputField.caretColor.a,
                 x => {
                     var c = InputField.caretColor;
@@ -189,9 +198,8 @@ public sealed class UIInput : UIObject {
                 },
                 1f,
                 0.02f
-            ).SetEase(Ease.OutQuad))
-
-            .Append(DOTween.To(
+            ).SetEasing(Easing.OutSine))
+            .Append(GTweenExtensions.Tween(
                 () => InputField.caretColor.a,
                 x => {
                     var c = InputField.caretColor;
@@ -200,7 +208,7 @@ public sealed class UIInput : UIObject {
                 },
                 0.4f,
                 0.62f
-            ).SetEase(Ease.OutQuad));
+            ).SetEasing(Easing.OutSine)).Build();
     }
 
     private void UpdatePlaceholder(bool focused) {
@@ -209,34 +217,36 @@ public sealed class UIInput : UIObject {
         float target = focused ? 0f : 0.2f;
         float duration = focused ? 0.2f : 0.3f;
 
-        placeholderTween = DOTween.To(
-            () => Placeholder.color.a,
-            x => {
-                Color c = Placeholder.color;
-                c.a = x;
-                Placeholder.color = c;
-            },
+        placeholderTween = GTweenSequenceBuilder.New()
+            .Append(GTweenExtensions.Tween(
+                () => Placeholder.color.a,
+                x => {
+                    Color c = Placeholder.color;
+                    c.a = x;
+                    Placeholder.color = c;
+                },
             target,
             duration
         )
-        .SetEase(Ease.OutQuad)
-        .SetUpdate(true);
+        .SetEasing(Easing.OutQuad)).Build();
+        MainCore.TC.Play(placeholderTween);
     }
 
     private void UpdateIconImage(bool focused) {
         iconTween?.Kill();
-        iconTween = DOTween.To(
-            () => IconImage.color.a,
-            x => {
-                Color c = IconImage.color;
-                c.a = x;
-                IconImage.color = c;
-            },
-            focused ? 0f : 0.2f,
-            focused ? 0.2f : 0.3f
-        )
-        .SetEase(Ease.OutQuad)
-        .SetUpdate(true);
+        iconTween = GTweenSequenceBuilder.New()
+            .Append(GTweenExtensions.Tween(
+                () => IconImage.color.a,
+                x => {
+                    Color c = IconImage.color;
+                    c.a = x;
+                    IconImage.color = c;
+                },
+                focused ? 0f : 0.2f,
+                focused ? 0.2f : 0.3f
+            )
+            .SetEasing(Easing.OutQuad)).Build();
+        MainCore.TC.Play(iconTween);
     }
 
     private readonly struct GlyphSnapshot(char character, Vector2 position) {

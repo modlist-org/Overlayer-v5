@@ -1,12 +1,20 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Overlay;
 using Overlayer.Resource;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Utility;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.EventSystems.PointerEventData;
+using GTweens.Tweens;
+using Overlayer.Tween;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Overlay;
 
@@ -24,45 +32,46 @@ public class OvCanvasSettingPage : IDisposable {
     public OvCanvasSettingPage(Transform parent, Action onBack) {
         onBackAction = onBack;
 
-        GameObject = new(nameof(OvCanvasSettingPage), typeof(RectTransform), typeof(CanvasGroup));
+        GameObject = new(nameof(OvCanvasSettingPage));
         GameObject.transform.SetParent(parent, false);
 
-        RectTransform = GameObject.GetComponent<RectTransform>();
+        RectTransform = GameObject.AddComponent<RectTransform>();
         RectTransform.anchorMin = Vector2.zero;
         RectTransform.anchorMax = Vector2.one;
         RectTransform.offsetMin = Vector2.zero;
         RectTransform.offsetMax = Vector2.zero;
 
-        CanvasGroup = GameObject.GetComponent<CanvasGroup>();
+        CanvasGroup = GameObject.AddComponent<CanvasGroup>();
         CanvasGroup.alpha = 0f;
         CanvasGroup.blocksRaycasts = false;
         GameObject.SetActive(false);
 
-        GameObject headerGo = new("Header", typeof(RectTransform));
+        GameObject headerGo = new("Header");
         headerGo.transform.SetParent(GameObject.transform, false);
-        var headerRect = headerGo.GetComponent<RectTransform>();
+        var headerRect = headerGo.AddComponent<RectTransform>();
         headerRect.anchorMin = new Vector2(0, 1);
         headerRect.anchorMax = Vector2.one;
         headerRect.offsetMin = new Vector2(0, -60);
         headerRect.offsetMax = Vector2.zero;
 
-        GameObject backBtnGo = new("BackButton", typeof(RectTransform), typeof(EmptyGraphic));
+        GameObject backBtnGo = new("BackButton");
         backBtnGo.transform.SetParent(headerGo.transform, false);
-        var backBtnRect = backBtnGo.GetComponent<RectTransform>();
+        var backBtnRect = backBtnGo.AddComponent<RectTransform>();
         backBtnRect.anchorMin = new Vector2(0, 0.5f);
         backBtnRect.anchorMax = new Vector2(0, 0.5f);
         backBtnRect.sizeDelta = new Vector2(90, 50);
         backBtnRect.anchoredPosition = new Vector2(70, 0);
+        backBtnGo.AddComponent<EmptyGraphic>();
 
-        GameObject backTxtGo = new("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        GameObject backTxtGo = new("Text");
         backTxtGo.transform.SetParent(backBtnGo.transform, false);
-        var backTxtRect = backTxtGo.GetComponent<RectTransform>();
+        var backTxtRect = backTxtGo.AddComponent<RectTransform>();
         backTxtRect.anchorMin = Vector2.zero;
         backTxtRect.anchorMax = Vector2.one;
         backTxtRect.offsetMin = Vector2.zero;
         backTxtRect.offsetMax = Vector2.zero;
 
-        var bTxt = backTxtGo.GetComponent<TextMeshProUGUI>();
+        var bTxt = backTxtGo.AddComponent<TextMeshProUGUI>();
         bTxt.text = "←";
         bTxt.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
         bTxt.fontSize = 26;
@@ -75,64 +84,121 @@ public class OvCanvasSettingPage : IDisposable {
             }
         }, false);
 
-        GameObject titleGo = new("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        GameObject titleGo = new("TitleText");
         titleGo.transform.SetParent(headerGo.transform, false);
-        var titleRect = titleGo.GetComponent<RectTransform>();
+        var titleRect = titleGo.AddComponent<RectTransform>();
         titleRect.anchorMin = new Vector2(0.5f, 0.5f);
         titleRect.anchorMax = new Vector2(0.5f, 0.5f);
         titleRect.sizeDelta = new Vector2(400, 50);
         titleRect.anchoredPosition = Vector2.zero;
 
-        titleText = titleGo.GetComponent<TextMeshProUGUI>();
+        titleText = titleGo.AddComponent<TextMeshProUGUI>();
         titleText.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
         titleText.fontSize = 24;
         titleText.alignment = TextAlignmentOptions.Center;
         titleText.color = Color.white;
 
-        GameObject contentGo = new("Content", typeof(RectTransform));
-        contentGo.transform.SetParent(GameObject.transform, false);
-        var contentRect = contentGo.GetComponent<RectTransform>();
-        contentRect.anchorMin = Vector2.zero;
-        contentRect.anchorMax = new Vector2(1, 1);
+        GameObject pad = new("Pad");
+        pad.transform.SetParent(GameObject.transform, false);
+
+        RectTransform padRect = pad.AddComponent<RectTransform>();
+        padRect.anchorMin = Vector2.zero;
+        padRect.anchorMax = Vector2.one;
+        padRect.pivot = new Vector2(0.5f, 0.5f);
+        padRect.offsetMin = new Vector2(18f, 18f);
+        padRect.offsetMax = new Vector2(-18f, -76f);
+
+        GameObject viewport = new("Viewport");
+        viewport.transform.SetParent(pad.transform, false);
+
+        RectTransform viewportRect = viewport.AddComponent<RectTransform>();
+        viewportRect.anchorMin = Vector2.zero;
+        viewportRect.anchorMax = Vector2.one;
+        viewportRect.offsetMin = Vector2.zero;
+        viewportRect.offsetMax = Vector2.zero;
+        viewportRect.pivot = new Vector2(0.5f, 0.5f);
+
+        viewport.AddComponent<EmptyGraphic>().raycastTarget = true;
+        viewport.AddComponent<RectMask2D>();
+
+        GameObject content = new("Content");
+        content.transform.SetParent(viewport.transform, false);
+
+        RectTransform contentRect = content.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
         contentRect.offsetMin = Vector2.zero;
-        contentRect.offsetMax = new Vector2(0, -60);
-        contentTransform = contentGo.transform;
+        contentRect.offsetMax = Vector2.zero;
+
+        VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = 12f;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+
+        ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        pad.AddComponent<UIScrollController>().SetContent(contentRect, viewportRect);
+
+        contentTransform = content.transform;
     }
+
+    private GTween canvasFadeTween;
 
     public void Open(OvCanvas canvas, bool noAnimate = false) {
         currentCanvas = canvas;
-        titleText.text = $"{(string.IsNullOrEmpty(canvas.Config.Name) ? "(Empty)" : canvas.Config.Name)}";
+        titleText.text = string.IsNullOrEmpty(canvas.Config.Name) ? "(Empty)" : canvas.Config.Name;
+
+        foreach(Transform child in contentTransform) {
+            UnityEngine.Object.Destroy(child.gameObject);
+        }
+
+        var nameRow = GenerateUI.Row(contentTransform);
+        var nameInput = GenerateUI.Input(nameRow, null, canvas.Config.Name, val => {
+            canvas.Config.Name = val;
+            titleText.text = val;
+            canvas.ApplyConfig();
+        }, "Canvas Name", null, "canvas_name");
+
+        var raycastRow = GenerateUI.Row(contentTransform);
+        var raycastToggle = GenerateUI.Toggle(raycastRow, true, canvas.Config.CanvasGroupConfig.BlocksRaycasts, val => {
+            canvas.Config.CanvasGroupConfig.BlocksRaycasts = val;
+            canvas.ApplyConfig();
+        }, "Blocks Raycasts", "blocks_raycasts");
 
         GameObject.SetActive(true);
-        CanvasGroup.blocksRaycasts = false;
-
-        CanvasGroup.DOKill();
+        
+        
         if(noAnimate) {
             CanvasGroup.alpha = 1f;
             CanvasGroup.blocksRaycasts = true;
         } else {
-            CanvasGroup.DOFade(1f, 0.25f).SetUpdate(true)
-                .SetEase(Ease.OutCubic)
+            canvasFadeTween?.Kill();
+            canvasFadeTween = CanvasGroup.GTFade(1f, 0.25f).SetEasing(Easing.OutCubic)
                 .OnComplete(() => CanvasGroup.blocksRaycasts = true);
+            MainCore.TC.Play(canvasFadeTween);
         }
     }
 
     public void Close(bool noAnimate = false) {
         CanvasGroup.blocksRaycasts = false;
+        canvasFadeTween?.Kill();
 
-        CanvasGroup.DOKill();
         if(noAnimate) {
             CanvasGroup.alpha = 0f;
             GameObject.SetActive(false);
         } else {
-            CanvasGroup.DOFade(0f, 0.25f).SetUpdate(true)
-                .SetEase(Ease.OutCubic)
-                .OnComplete(() => GameObject.SetActive(false));
+            canvasFadeTween = CanvasGroup.GTFade(0f, 0.25f).SetEasing(Easing.OutCubic);
+            canvasFadeTween.OnComplete(() => GameObject.SetActive(false));
+            MainCore.TC.Play(canvasFadeTween);
         }
     }
 
     public void Dispose() {
-        CanvasGroup.DOKill();
+        canvasFadeTween?.Kill();
 
         if(GameObject != null) {
             UnityEngine.Object.Destroy(GameObject);

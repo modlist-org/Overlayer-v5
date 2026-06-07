@@ -1,12 +1,21 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Localization;
 using Overlayer.Resource;
 using Overlayer.UI.Transition;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using GTweens.Tweens;
+using Overlayer.Tween;
+
+using GTweens.Builders;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Factory;
 
@@ -17,7 +26,7 @@ public static class MenuFactory {
         public int state;
         public GameObject obj;
         public Image bg;
-        public Sequence hoverSeq;
+        public GTween hoverSeq;
         public TMP_Text label;
     }
 
@@ -117,9 +126,10 @@ public static class MenuFactory {
             }
 
             menuItem.hoverSeq?.Kill();
-            menuItem.hoverSeq = DOTween.Sequence()
-                .Append(bg.DOColor(UIColors.MenuHover, 0.2f))
-                .SetUpdate(true);
+            menuItem.hoverSeq = GTweenSequenceBuilder.New()
+                .Append(bg.GTColor(UIColors.MenuHover, 0.2f).SetEasing(Easing.OutSine))
+                .Build();
+            MainCore.TC.Play(menuItem.hoverSeq);
         });
 
         Add(EventTriggerType.PointerExit, () => {
@@ -128,9 +138,10 @@ public static class MenuFactory {
             }
 
             menuItem.hoverSeq?.Kill();
-            menuItem.hoverSeq = DOTween.Sequence()
-                .Append(bg.DOColor(UIColors.MenuNormal, 0.25f))
-                .SetUpdate(true);
+            menuItem.hoverSeq = GTweenSequenceBuilder.New()
+                .Append(bg.GTColor(UIColors.MenuNormal, 0.25f).SetEasing(Easing.OutSine))
+                .Build();
+            MainCore.TC.Play(menuItem.hoverSeq);
         });
 
         Add(EventTriggerType.PointerClick, () => SetState(state));
@@ -158,7 +169,6 @@ public static class MenuFactory {
             var it = items[i];
 
             it.hoverSeq?.Kill();
-            it.bg.DOKill();
 
             bool selected = it.state == id;
 
@@ -168,9 +178,9 @@ public static class MenuFactory {
                 } else {
                     it.bg.color = UIColors.MenuHighlight;
 
-                    it.bg.DOColor(UIColors.MenuSelected, 0.3f)
-                        .SetEase(Ease.OutSine)
-                        .SetUpdate(true);
+                    it.hoverSeq = it.bg.GTColor(UIColors.MenuSelected, 0.3f)
+                        .SetEasing(Easing.OutSine);
+                    MainCore.TC.Play(it.hoverSeq);
                 }
             } else {
                 it.bg.color = UIColors.MenuNormal;

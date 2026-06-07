@@ -1,9 +1,13 @@
-﻿using DG.Tweening;
+﻿using GTweens.Builders;
+using GTweens.Easings;
+using GTweens.Extensions;
+using GTweens.Tweens;
 using Overlayer.Async;
 using Overlayer.Core;
 using Overlayer.IO;
 using Overlayer.Localization;
 using Overlayer.Resource;
+using Overlayer.Tween;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Objects.Impl;
 using Overlayer.UI.Utility;
@@ -140,8 +144,8 @@ internal static class PageSettings {
             },
             value => {
                 MainCore.Tr.Language = value;
-                MainCore.Config.Language = value;
-                MainCore.ConfigFile.RequestSave();
+                MainCore.Conf.Language = value;
+                MainCore.ConfMgr.RequestSave();
                 TextLocalization.RefreshAll();
             },
             "language_dropdown"
@@ -186,10 +190,10 @@ internal static class PageSettings {
         UIToggle startupToggle = GenerateUI.Toggle(
             startupRow,
             defSet.ShowOnStartup,
-            MainCore.Config.ShowOnStartup,
+            MainCore.Conf.ShowOnStartup,
             toggle => {
-                MainCore.Config.ShowOnStartup = toggle;
-                MainCore.ConfigFile.RequestSave();
+                MainCore.Conf.ShowOnStartup = toggle;
+                MainCore.ConfMgr.RequestSave();
             },
             "Show Overlayer Panel at Startup",
             "show_on_startup"
@@ -201,11 +205,11 @@ internal static class PageSettings {
         UIToggle tooltipToggle = GenerateUI.Toggle(
             tooltipRow,
             defSet.Tooltip,
-            MainCore.Config.Tooltip,
+            MainCore.Conf.Tooltip,
             toggle => {
                 Tooltip.Hide();
-                MainCore.Config.Tooltip = toggle;
-                MainCore.ConfigFile.RequestSave();
+                MainCore.Conf.Tooltip = toggle;
+                MainCore.ConfMgr.RequestSave();
             },
             "Show Tooltip",
             "show_tooltip"
@@ -221,10 +225,10 @@ internal static class PageSettings {
         UIToggle middleClickToggle = GenerateUI.Toggle(
             middleClickRow,
             defSet.MiddleClickToDefault,
-            MainCore.Config.MiddleClickToDefault,
+            MainCore.Conf.MiddleClickToDefault,
             toggle => {
-                MainCore.Config.MiddleClickToDefault = toggle;
-                MainCore.ConfigFile.RequestSave();
+                MainCore.Conf.MiddleClickToDefault = toggle;
+                MainCore.ConfMgr.RequestSave();
             },
             "Middle-click to set as default",
             "middle_click_default"
@@ -246,7 +250,7 @@ internal static class PageSettings {
             1f,
             0.8f,
             1.6f,
-            MainCore.Config.UIScale,
+            MainCore.Conf.UIScale,
             uiScaleFilter,
             null,
             null,
@@ -254,30 +258,34 @@ internal static class PageSettings {
             "ui_scale"
         );
         uiScale.Format = "0.00x";
-        uiScale.OnChanged = value => MainCore.Config.UIScale = value;
-        Sequence scaleSeq = null;
+        uiScale.OnChanged = value => MainCore.Conf.UIScale = value;
+        GTween scaleSeq = null;
         uiScale.OnComplete = value => {
-            MainCore.Config.UIScale = value;
-            MainCore.ConfigFile.RequestSave();
+            MainCore.Conf.UIScale = value;
+            MainCore.ConfMgr.RequestSave();
 
             scaleSeq?.Kill();
 
             float scaleStart = UICore.PanelScale;
             Vector2 targetSize = UICore.DefaultPanelSize;
             UICore.LastPanelSize = targetSize;
-            scaleSeq = DOTween.Sequence().SetUpdate(true)
+
+            scaleSeq = GTweenSequenceBuilder.New()
                 .Append(
-                    DOTween.To(
+                    GTweenExtensions.Tween(
                         () => scaleStart,
                         x => UICore.PanelScale = x,
                         value,
                         0.4f
-                    ).SetEase(Ease.OutExpo)
-                ).Join(
-                    UICore.Panel
-                    .DOSizeDelta(targetSize, 0.4f)
-                    .SetEase(Ease.OutExpo)
-                );
+                    ).SetEasing(Easing.OutExpo)
+                )
+                .Join(
+                    UICore.Panel.GTSizeDelta(targetSize, 0.4f)
+                        .SetEasing(Easing.OutExpo)
+                )
+                .Build();
+
+            MainCore.TC.Play(scaleSeq);
         };
         var uiScaleTr = uiScale.Label.gameObject.AddComponent<TextLocalization>().Init("UI_SCALE", "UI Scale");
 
@@ -289,9 +297,9 @@ internal static class PageSettings {
 
         languageDropdown.SetValues(langs);
         languageDropdown.Set(
-            string.IsNullOrWhiteSpace(MainCore.Config.Language)
+            string.IsNullOrWhiteSpace(MainCore.Conf.Language)
                 ? Translator.FALLBACK_LANGUAGE
-                : MainCore.Config.Language,
+                : MainCore.Conf.Language,
             false
         );
     }

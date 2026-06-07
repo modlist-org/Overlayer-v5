@@ -1,14 +1,24 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Localization;
 using Overlayer.Resource;
 using Overlayer.UI.Objects.Impl;
 using Overlayer.UI.Utility;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UnityEngine.EventSystems.PointerEventData;
+using GTweens.Tweens;
+using GTweens.Easings;
+using GTweens.Extensions;
+
+using GTweens.Builders;
+using Overlayer.Tween;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Generator;
 
@@ -75,7 +85,7 @@ public static class GenerateUI {
 
                 case InputButton.Middle:
                     if(
-                        MainCore.Config.MiddleClickToDefault &&
+                        MainCore.Conf.MiddleClickToDefault &&
                         toggle.Value != toggle.DefaultValue
                     ) {
                         toggle.Reset();
@@ -218,7 +228,7 @@ public static class GenerateUI {
                     break;
 
                 case InputButton.Middle:
-                    if(!MainCore.Config.MiddleClickToDefault) {
+                    if(!MainCore.Conf.MiddleClickToDefault) {
                         break;
                     }
                     slider.Set(Apply(defaultValue));
@@ -348,7 +358,7 @@ public static class GenerateUI {
             onChanged
         );
 
-        Sequence layoutSeq = null;
+        GTween layoutSeq = null;
         LayoutElement parentLayout = parent.GetComponent<LayoutElement>();
         void UpdateHeight() {
             float rowHeight = 50f;
@@ -363,22 +373,28 @@ public static class GenerateUI {
 
             layoutSeq?.Kill();
 
-            layoutSeq = DOTween.Sequence().SetUpdate(true)
-                .Join(DOTween.To(
-                    () => parentLayout.preferredHeight,
-                    x => {
-                        parentLayout.preferredHeight = x;
-                        LayoutRebuilder.ForceRebuildLayoutImmediate(rootRect);
-                    },
-                    targetHeight,
-                    0.14f
-                ).SetEase(Ease.OutBack))
-                .Join(DOTween.To(
-                    () => listCg.alpha,
-                    x => listCg.alpha = x,
-                    targetAlpha,
-                    0.16f
-                ).SetEase(Ease.OutSine));
+            layoutSeq = GTweenSequenceBuilder.New()
+                .Join(
+                    GTweenExtensions.Tween(
+                        () => parentLayout.preferredHeight,
+                        x => {
+                            parentLayout.preferredHeight = x;
+                            LayoutRebuilder.ForceRebuildLayoutImmediate(rootRect);
+                        },
+                        targetHeight,
+                        0.14f
+                    ).SetEasing(Easing.OutBack)
+                )
+                .Join(
+                    GTweenExtensions.Tween(
+                        () => listCg.alpha,
+                        x => listCg.alpha = x,
+                        targetAlpha,
+                        0.16f
+                    ).SetEasing(Easing.OutSine)
+                )
+                .Build();
+            MainCore.TC.Play(layoutSeq);
         }
 
         dropdown.OnLayoutChanged = () => {
@@ -403,30 +419,32 @@ public static class GenerateUI {
 
             EventTrigger trigger = row.AddComponent<EventTrigger>();
 
-            Sequence hoverSeq = null;
+            GTween hoverSeq = null;
 
             UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().SetUpdate(true)
-                .Append(
-                    rowImage.DOColor(
-                        UIColors.ObjectActive,
-                        0.12f
-                    ).SetEase(Ease.OutSine)
-                );
+                hoverSeq = GTweenSequenceBuilder.New()
+                    .Append(
+                        rowImage.GTColor(UIColors.ObjectActive, 0.12f)
+                            .SetEasing(Easing.OutSine)
+                    )
+                    .Build();
+
+                MainCore.TC.Play(hoverSeq);
             }, trigger);
 
             UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
                 hoverSeq?.Kill();
 
-                hoverSeq = DOTween.Sequence().SetUpdate(true)
-                .Append(
-                    rowImage.DOColor(
-                        Color.clear,
-                        0.12f
-                    ).SetEase(Ease.OutSine)
-                );
+                hoverSeq = GTweenSequenceBuilder.New()
+                    .Append(
+                        rowImage.GTColor(Color.clear, 0.12f)
+                            .SetEasing(Easing.OutSine)
+                    )
+                    .Build();
+
+                MainCore.TC.Play(hoverSeq);
             }, trigger);
         }
 
@@ -440,7 +458,7 @@ public static class GenerateUI {
 
                 case InputButton.Middle:
                     if(
-                        MainCore.Config.MiddleClickToDefault && dropdown.DefaultValue != null &&
+                        MainCore.Conf.MiddleClickToDefault && dropdown.DefaultValue != null &&
                         !EqualityComparer<T>.Default.Equals(
                             dropdown.Value,
                             dropdown.DefaultValue
@@ -485,14 +503,15 @@ public static class GenerateUI {
         iconImage.sprite = icon;
         iconImage.color = new Color(1f, 1f, 1f, 0.2f);
 
-        GameObject inputObj = new("Input", typeof(RectTransform), typeof(RectMask2D));
+        GameObject inputObj = new("Input");
         inputObj.transform.SetParent(rect, false);
 
-        RectTransform inputRect = inputObj.GetComponent<RectTransform>();
+        RectTransform inputRect = inputObj.AddComponent<RectTransform>();
         inputRect.anchorMin = Vector2.zero;
         inputRect.anchorMax = Vector2.one;
-        inputRect.offsetMin = new(12f, 4f);
+        inputRect.offsetMin = new(16f, 4f);
         inputRect.offsetMax = new(-12f, -4f);
+        inputObj.AddComponent<RectMask2D>();
 
         TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
 
@@ -544,7 +563,7 @@ public static class GenerateUI {
             switch(btn) {
                 case InputButton.Middle:
                     if(
-                        MainCore.Config.MiddleClickToDefault &&
+                        MainCore.Conf.MiddleClickToDefault &&
                         input.Value != input.DefaultValue
                     ) {
                         input.Reset();
@@ -594,7 +613,7 @@ public static class GenerateUI {
         => UnityUtils.AddEvent(EventTriggerType.PointerClick, (e) => onClick?.Invoke(e.button), trigger);
 
     private static void AddOutlineHover(GameObject obj, EventTrigger trigger) {
-        Sequence hoverSeq = null;
+        GTween hoverSeq = null;
 
         GameObject hover = new("Hover");
         hover.transform.SetParent(obj.transform, false);
@@ -616,9 +635,8 @@ public static class GenerateUI {
 
         UnityUtils.AddEvent(EventTriggerType.PointerEnter, (e) => {
             hoverSeq?.Kill();
-
-            hoverSeq = DOTween.Sequence().SetUpdate(true)
-                .Append(DOTween.To(
+            hoverSeq = GTweenSequenceBuilder.New()
+                .Append(GTweenExtensions.Tween(
                     () => hoverImage.color.a,
                     x => {
                         Color c = hoverImage.color;
@@ -627,15 +645,16 @@ public static class GenerateUI {
                     },
                     1f,
                     0.1f
-                ).SetEase(Ease.OutSine)
-            );
+                ).SetEasing(Easing.OutSine))
+                .Build();
+
+            MainCore.TC.Play(hoverSeq);
         }, trigger);
 
         UnityUtils.AddEvent(EventTriggerType.PointerExit, (e) => {
             hoverSeq?.Kill();
-
-            hoverSeq = DOTween.Sequence().SetUpdate(true)
-                .Append(DOTween.To(
+            hoverSeq = GTweenSequenceBuilder.New()
+                .Append(GTweenExtensions.Tween(
                     () => hoverImage.color.a,
                     x => {
                         Color c = hoverImage.color;
@@ -644,8 +663,9 @@ public static class GenerateUI {
                     },
                     0f,
                     0.1f
-                ).SetEase(Ease.OutSine)
-            );
+                ).SetEasing(Easing.OutSine))
+                .Build();
+            MainCore.TC.Play(hoverSeq);
         }, trigger);
     }
 

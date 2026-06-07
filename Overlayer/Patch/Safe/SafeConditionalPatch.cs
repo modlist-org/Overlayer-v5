@@ -17,9 +17,9 @@ public abstract class SafeConditionalPatch(string id) {
             var method = GetTargetMethod();
             SafePatchManager.Harmony.Patch(method, Prefix(), Postfix(), Transpiler());
             IsApplied = true;
-            MainCore.Logger.Msg($"[{nameof(SafePatch)}] {Id} Applied");
+            MainCore.Log.Msg($"[{nameof(SafePatch)}] {Id} Applied");
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(SafePatch)}] {Id} Apply Failed: {e.Message}");
+            MainCore.Log.Err($"[{nameof(SafePatch)}] {Id} Apply Failed: {e.Message}");
         }
     }
 
@@ -32,9 +32,9 @@ public abstract class SafeConditionalPatch(string id) {
             var method = GetTargetMethod();
             SafePatchManager.Harmony.Unpatch(method, HarmonyPatchType.All, SafePatchManager.Harmony.Id);
             IsApplied = false;
-            MainCore.Logger.Msg($"[{nameof(SafePatch)}] {Id} Removed");
+            MainCore.Log.Msg($"[{nameof(SafePatch)}] {Id} Removed");
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(SafePatch)}] {Id} Remove Failed: {e.Message}");
+            MainCore.Log.Err($"[{nameof(SafePatch)}] {Id} Remove Failed: {e.Message}");
         }
     }
 

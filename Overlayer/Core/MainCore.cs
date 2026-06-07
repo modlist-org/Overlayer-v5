@@ -1,4 +1,5 @@
 ﻿//using Microsoft.ClearScript.V8;
+using GTweens.Contexts;
 using Overlayer.Compat;
 using Overlayer.Compat.Interface;
 using Overlayer.Core.Service;
@@ -18,16 +19,17 @@ public static class MainCore {
     }
 
     public static Version Version => Runtime.Version;
-    public static Assembly Assembly => Runtime.Assembly;
-    public static OverlayerLogger Logger => Runtime.Logger;
+    public static Assembly Asm => Runtime.Assembly;
+    public static OverlayerLogger Log => Runtime.Logger;
     public static PathService Paths => Runtime.Paths;
-    public static SettingsFile<CoreSettings> ConfigFile => Runtime.Config;
-    public static CoreSettings Config => Runtime.Config.Data;
+    public static SettingsFile<CoreSettings> ConfMgr => Runtime.Config;
+    public static CoreSettings Conf => Runtime.Config.Data;
     public static Translator Tr => Runtime.Localization.Translator;
     public static ResourceManager Res => Runtime.Resource;
     public static SpriteManager Spr => Runtime.Sprite;
     public static IOverlayerHost Host => Runtime.Host;
     public static UnityEngine.GameObject Root => Runtime.RootObject;
+    public static GTweensContext TC => Runtime.TweensContext;
     //public static V8ScriptEngine V8 => Runtime.V8Engine;
     public static bool IsModEnabled => Runtime.State.IsEnabled;
 

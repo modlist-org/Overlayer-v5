@@ -1,8 +1,14 @@
 ﻿using Overlayer.Core;
 using System.Reflection;
-using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Overlayer.Compat.OVC;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.Resource;
 
@@ -78,7 +84,7 @@ public sealed class ResourceManager(Assembly assembly, string resourcePath) : ID
 
         Texture2D texture = new(2, 2, TextureFormat.RGBA32, false, true);
 
-        if(!texture.LoadImage(data)) {
+        if(!OVC_Texture2D.LoadImage(texture, data)) {
             Object.Destroy(texture);
             return null;
         }

@@ -1,10 +1,14 @@
-﻿using DG.Tweening;
+﻿using GTweens.Builders;
+using GTweens.Easings;
+using GTweens.Tweens;
+using Overlayer.Core;
+using Overlayer.Tween;
 using UnityEngine;
 
 namespace Overlayer.UI.Transition;
 
 public class PageSwicher {
-    private static Sequence pageSeq;
+    private static GTween pageSeq;
 
     public static bool SwitchPage(int from, int to) {
         if(from == to) {
@@ -26,7 +30,10 @@ public class PageSwicher {
             return false;
         }
 
-        pageSeq?.Kill(true);
+        if(pageSeq != null) {
+            pageSeq.Complete();
+            pageSeq.Kill();
+        }
 
         fromPage.anchoredPosition = Vector2.zero;
         toPage.anchoredPosition = new Vector2(600f, 0f);
@@ -40,23 +47,24 @@ public class PageSwicher {
         toCg.interactable = false;
         toCg.blocksRaycasts = false;
 
-        pageSeq = DOTween.Sequence().SetUpdate(true);
-
-        pageSeq.Join(fromPage.DOAnchorPosX(-600f, 0.35f).SetEase(Ease.OutCubic));
-        pageSeq.Join(fromCg.DOFade(0f, 0.3f));
-
-        pageSeq.Join(toPage.DOAnchorPosX(0f, 0.45f).SetEase(Ease.OutExpo).SetDelay(0.05f));
-        pageSeq.Join(toCg.DOFade(1f, 0.3f));
-
-        pageSeq.Insert(0.1f, DOTween.To(
-            () => 0,
-            _ => {
+        pageSeq = GTweenSequenceBuilder.New()
+            .Join(fromPage.GTAnchorPosX(-600f, 0.35f).SetEasing(Easing.OutCubic))
+            .Join(fromCg.GTFade(0f, 0.3f))
+            .Join(
+                GTweenSequenceBuilder.New()
+                    .AppendTime(0.05f)
+                    .Append(toPage.GTAnchorPosX(0f, 0.45f).SetEasing(Easing.OutExpo))
+                    .Build()
+            )
+            .Join(toCg.GTFade(1f, 0.3f))
+            .AppendTime(0.1f)
+            .AppendCallback(() => {
                 toCg.interactable = true;
                 toCg.blocksRaycasts = true;
-            },
-            1,
-            0f
-        ));
+            })
+            .Build();
+
+        MainCore.TC.Play(pageSeq);
 
         return true;
     }

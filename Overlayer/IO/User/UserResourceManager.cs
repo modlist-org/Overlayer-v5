@@ -12,9 +12,9 @@ public static class UserResourceManager {
     public static void Initialize() {
         try {
             Config.Load();
-            MainCore.Logger.Msg($"[{nameof(UserResourceManager)}] Initialized");
+            MainCore.Log.Msg($"[{nameof(UserResourceManager)}] Initialized");
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(UserResourceManager)}] Initialize failed: {e}");
+            MainCore.Log.Err($"[{nameof(UserResourceManager)}] Initialize failed: {e}");
         }
     }
 
@@ -54,9 +54,9 @@ public static class UserResourceManager {
         try {
             Config.Save();
             Config.Dispose();
-            MainCore.Logger.Msg($"[{nameof(UserResourceManager)}] Disposed");
+            MainCore.Log.Msg($"[{nameof(UserResourceManager)}] Disposed");
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(UserResourceManager)}] Dispose failed: {e}");
+            MainCore.Log.Err($"[{nameof(UserResourceManager)}] Dispose failed: {e}");
         }
     }
 }

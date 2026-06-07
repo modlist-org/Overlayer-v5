@@ -52,7 +52,7 @@ public class UserSprite : UserResourceBase<(Sprite sprite, string textureKey, Sp
             sprite = spr;
             return Result.Success;
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(UserSprite)}] Sprite load failed: {e}");
+            MainCore.Log.Err($"[{nameof(UserSprite)}] Sprite load failed: {e}");
             return Result.Failed;
         }
     }
@@ -72,7 +72,7 @@ public class UserSprite : UserResourceBase<(Sprite sprite, string textureKey, Sp
 
     public void Deserialize(JToken token) {
         if(token is not JObject obj) {
-            MainCore.Logger.Wrn(
+            MainCore.Log.Wrn(
                 $"[{nameof(UserSprite)}] Deserialize failed: token is not JObject"
             );
             return;
@@ -106,7 +106,7 @@ public class UserSprite : UserResourceBase<(Sprite sprite, string textureKey, Sp
             );
 
             if(result != Result.Success) {
-                MainCore.Logger.Wrn(
+                MainCore.Log.Wrn(
                     $"[{nameof(UserSprite)}] {result} {{ \"{property.Name}\": \"{textureKey}\" }}"
                 );
             }

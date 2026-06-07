@@ -27,7 +27,7 @@ public sealed class SettingsFile<T>(string path) where T : class, ISettingsFile,
 
             return true;
         } catch(Exception e) {
-            MainCore.Logger.Err(
+            MainCore.Log.Err(
                 $"[{nameof(SettingsFile<>)}] Failed to load settings '{Path}': {e}"
             );
 
@@ -49,7 +49,7 @@ public sealed class SettingsFile<T>(string path) where T : class, ISettingsFile,
 
                 return true;
             } catch(Exception e) {
-                MainCore.Logger.Err(
+                MainCore.Log.Err(
                     $"[{nameof(SettingsFile<>)}] Failed to save settings '{Path}': {e}"
                 );
 
@@ -84,7 +84,7 @@ public sealed class SettingsFile<T>(string path) where T : class, ISettingsFile,
                 Save();
             } catch(OperationCanceledException) {
             } catch(Exception e) {
-                MainCore.Logger.Err(
+                MainCore.Log.Err(
                     $"[{nameof(SettingsFile<>)}] Failed to request save '{Path}': {e}"
                 );
             } finally {

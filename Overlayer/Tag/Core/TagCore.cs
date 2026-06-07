@@ -16,6 +16,7 @@ public enum TagType {
 
 public class TagCore {
     public string Name { get; }
+    public string Description { get; } = null;
     public TagType TagType { get; }
     public MemberInfo Member { get; }
     public ParameterInfo[] Parameters { get; }
@@ -26,8 +27,9 @@ public class TagCore {
     public readonly bool IsProperty;
     public readonly bool IsField;
 
-    public TagCore(string name, MemberInfo member, TagType tagType) {
+    public TagCore(string name, MemberInfo member, TagType tagType, string description = null) {
         Name = name;
+        Description = description;
         TagType = tagType;
         Member = member;
 

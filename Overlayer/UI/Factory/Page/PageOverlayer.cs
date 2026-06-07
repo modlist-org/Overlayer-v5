@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+﻿using Overlayer.Compat.Attribute;
 using Overlayer.Core;
 using Overlayer.Localization;
 using Overlayer.Overlay;
@@ -6,11 +6,19 @@ using Overlayer.Resource;
 using Overlayer.UI.Generator;
 using Overlayer.UI.Overlay;
 using Overlayer.UI.Utility;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UnityEngine.EventSystems.PointerEventData;
+using Overlayer.Tween;
+using GTweens.Easings;
+using GTweens.Tweens;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Factory.Page;
 
@@ -20,46 +28,47 @@ internal static class PageOverlayer {
     private static GameObject rootViewport;
     private static CanvasGroup viewportCanvasGroup;
     private static GameObject disabledPanel;
-    private static Transform gridTransform;
     private static RectTransform contentRectRef;
 
     private static OvCanvasSettingPage settingPage;
 
     public static void Create(RectTransform parent) {
-        GameObject viewport = new("Viewport", typeof(RectTransform), typeof(EmptyGraphic), typeof(RectMask2D), typeof(CanvasGroup));
+        MainCore.Log.Msg("Creating Overlayer Page UI...");
+        GameObject viewport = new("Viewport");
         viewport.transform.SetParent(parent, false);
-        RectTransform viewportRect = viewport.GetComponent<RectTransform>();
+        RectTransform viewportRect = viewport.AddComponent<RectTransform>();
         viewportRect.anchorMin = Vector2.zero;
         viewportRect.anchorMax = Vector2.one;
         viewportRect.offsetMin = Vector2.zero;
         viewportRect.offsetMax = Vector2.zero;
-        viewport.GetComponent<EmptyGraphic>().raycastTarget = true;
+        viewport.AddComponent<EmptyGraphic>().raycastTarget = true;
         rootViewport = viewport;
-        viewportCanvasGroup = viewport.GetComponent<CanvasGroup>();
+        viewportCanvasGroup = viewport.AddComponent<CanvasGroup>();
+        viewport.AddComponent<RectMask2D>();
 
-        GameObject content = new("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+        GameObject content = new("Content");
         content.transform.SetParent(viewportRect, false);
-        contentRectRef = content.GetComponent<RectTransform>();
+        contentRectRef = content.AddComponent<RectTransform>();
         contentRectRef.anchorMin = new Vector2(0f, 1f);
         contentRectRef.anchorMax = new Vector2(1f, 1f);
         contentRectRef.pivot = new Vector2(0.5f, 1f);
         contentRectRef.offsetMin = Vector2.zero;
         contentRectRef.offsetMax = Vector2.zero;
 
-        var contentLayout = content.GetComponent<VerticalLayoutGroup>();
+        var contentLayout = content.AddComponent<VerticalLayoutGroup>();
         contentLayout.childControlHeight = true;
         contentLayout.childControlWidth = true;
         contentLayout.childForceExpandHeight = false;
         contentLayout.childForceExpandWidth = true;
 
-        var fitter = content.GetComponent<ContentSizeFitter>();
+        var fitter = content.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        GameObject grid = new("Grid", typeof(RectTransform), typeof(GridLayoutGroup));
+        GameObject grid = new("Grid");
         grid.transform.SetParent(contentRectRef, false);
-        gridTransform = grid.transform;
 
-        GridLayoutGroup layout = grid.GetComponent<GridLayoutGroup>();
+        grid.AddComponent<RectTransform>();
+        GridLayoutGroup layout = grid.AddComponent<GridLayoutGroup>();
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.constraintCount = 3;
         layout.spacing = new Vector2(18, 18);
@@ -72,6 +81,9 @@ internal static class PageOverlayer {
 
         CreateDisabledPanel(viewportRect);
 
+        LayoutRebuilder.ForceRebuildLayoutImmediate(parent);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRectRef);
+
         settingPage = new OvCanvasSettingPage(parent, () => {
             settingPage.Close();
             FadeCanvasGroup(viewportCanvasGroup, 1f, true);
@@ -79,16 +91,16 @@ internal static class PageOverlayer {
 
         MainCore.OnModEnabledChanged += (isEnabled, isDispose) => {
             if(!isDispose) {
-                ToggleUIStateByMod(isEnabled);
+                ToggleUIStateByMod(grid.transform, isEnabled);
             }
         };
 
         if(!MainCore.IsModEnabled) {
-            ToggleUIStateByMod(false);
+            ToggleUIStateByMod(grid.transform, false);
         }
     }
 
-    private static void ToggleUIStateByMod(bool isEnabled) {
+    private static void ToggleUIStateByMod(Transform transform, bool isEnabled) {
         if(!isEnabled) {
             settingPage?.Close(true);
             FadeCanvasGroup(viewportCanvasGroup, 1f, true, true);
@@ -96,32 +108,33 @@ internal static class PageOverlayer {
                 disabledPanel.SetActive(true);
                 disabledPanel.transform.SetAsLastSibling();
             }
-            ClearAllTiles();
+            ClearAllTiles(transform);
             return;
         }
 
         disabledPanel?.SetActive(false);
-        BuildAllTiles();
+        BuildAllTiles(transform);
     }
 
-    private static void BuildAllTiles() {
-        if(gridTransform == null) {
+    private static void BuildAllTiles(Transform transform) {
+        if(transform == null) {
+            MainCore.Log.Msg("?????");
             return;
         }
 
-        ClearAllTiles();
+        ClearAllTiles(transform);
 
         for(int i = 0; i < OverlayCore.Canvases.Count; i++) {
             var c = OverlayCore.Canvases[i];
             if(!tileMap.TryGetValue(c, out var tile)) {
-                tile = CreateCanvasTile(gridTransform, c);
+                tile = CreateCanvasTile(transform, c);
                 tileMap[c] = tile;
             }
         }
 
-        GameObject addTile = CreateAddTile(gridTransform, () => {
+        GameObject addTile = CreateAddTile(transform, () => {
             var canvas = OverlayCore.CreateOvCanvas();
-            BuildAllTiles();
+            BuildAllTiles(transform);
         });
         addTile.name = "AddTile";
 
@@ -130,12 +143,12 @@ internal static class PageOverlayer {
         }
     }
 
-    private static void ClearAllTiles() {
-        if(gridTransform == null) {
+    private static void ClearAllTiles(Transform transform) {
+        if(transform == null) {
             return;
         }
 
-        foreach(Transform child in gridTransform) {
+        foreach(Transform child in transform) {
             if(child.name == "DisabledOverlayPanel") {
                 continue;
             }
@@ -147,27 +160,27 @@ internal static class PageOverlayer {
     }
 
     private static void CreateDisabledPanel(RectTransform parent) {
-        disabledPanel = new GameObject("DisabledOverlayPanel", typeof(RectTransform), typeof(Image));
+        disabledPanel = new GameObject("DisabledOverlayPanel");
         disabledPanel.transform.SetParent(parent, false);
 
-        var rect = disabledPanel.GetComponent<RectTransform>();
+        var rect = disabledPanel.AddComponent<RectTransform>();
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
 
-        var img = disabledPanel.GetComponent<Image>();
+        var img = disabledPanel.AddComponent<Image>();
         img.color = UIColors.PanelBG;
         img.raycastTarget = true;
 
-        GameObject textGo = new("DisabledMessageText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        GameObject textGo = new("DisabledMessageText");
         textGo.transform.SetParent(disabledPanel.transform, false);
 
-        var textRect = textGo.GetComponent<RectTransform>();
+        var textRect = textGo.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
 
-        var txt = textGo.GetComponent<TextMeshProUGUI>();
+        var txt = textGo.AddComponent<TextMeshProUGUI>();
         txt.text = "Only available when the Mod is Enabled!";
         txt.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
         txt.fontSize = 24;
@@ -181,25 +194,27 @@ internal static class PageOverlayer {
     }
 
     static GameObject CreateCanvasTile(Transform parent, OvCanvas canvas) {
-        var bg = new GameObject(canvas.Config.Name, typeof(RectTransform), typeof(Image));
+        var bg = new GameObject(canvas.Config.Name);
         bg.transform.SetParent(parent, false);
 
-        var bgImg = bg.GetComponent<Image>();
+        bg.AddComponent<RectTransform>();
+
+        var bgImg = bg.AddComponent<Image>();
         bgImg.sprite = MainCore.Spr.Get(UISliceSprite.Circle256P2048);
         bgImg.type = Image.Type.Sliced;
         bgImg.color = UIColors.ObjectBG;
         bgImg.raycastTarget = false;
 
-        GameObject textGo = new("CanvasNameText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        GameObject textGo = new("CanvasNameText");
         textGo.transform.SetParent(bg.transform, false);
 
-        var textRect = textGo.GetComponent<RectTransform>();
+        var textRect = textGo.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = new Vector2(20, 20);
         textRect.offsetMax = new Vector2(-20, -20);
 
-        var txt = textGo.GetComponent<TextMeshProUGUI>();
+        var txt = textGo.AddComponent<TextMeshProUGUI>();
         txt.text = string.IsNullOrEmpty(canvas.Config.Name) ? "(Empty)" : canvas.Config.Name;
         txt.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
         txt.fontSize = 22;
@@ -220,34 +235,35 @@ internal static class PageOverlayer {
     }
 
     static GameObject CreateAddTile(Transform parent, Action onClick) {
-        var go = new GameObject("AddTile", typeof(RectTransform), typeof(EmptyGraphic));
+        var go = new GameObject("AddTile");
         go.transform.SetParent(parent, false);
+        go.AddComponent<RectTransform>();
         go.GetComponent<EmptyGraphic>().raycastTarget = true;
 
-        GameObject bgGo = new("Background", typeof(RectTransform), typeof(Image));
+        GameObject bgGo = new("Background");
         bgGo.transform.SetParent(go.transform, false);
-        var bgRect = bgGo.GetComponent<RectTransform>();
+        var bgRect = bgGo.AddComponent<RectTransform>();
         bgRect.anchorMin = Vector2.zero;
         bgRect.anchorMax = Vector2.one;
         bgRect.offsetMin = Vector2.zero;
         bgRect.offsetMax = Vector2.zero;
 
-        var bgImg = bgGo.GetComponent<Image>();
+        var bgImg = bgGo.AddComponent<Image>();
         bgImg.sprite = MainCore.Spr.Get(UISliceSprite.Circle256P2048);
         bgImg.type = Image.Type.Sliced;
         bgImg.color = UIColors.ObjectButton;
         bgImg.raycastTarget = false;
 
-        GameObject textGo = new("PlusText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        GameObject textGo = new("PlusText");
         textGo.transform.SetParent(go.transform, false);
 
-        var textRect = textGo.GetComponent<RectTransform>();
+        var textRect = textGo.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
 
-        var txt = textGo.GetComponent<TextMeshProUGUI>();
+        var txt = textGo.AddComponent<TextMeshProUGUI>();
         txt.text = "+";
         txt.font = MainCore.Res.Get<TMP_FontAsset>(Asset.SUIT_Medium);
         txt.fontSize = 60;
@@ -265,32 +281,36 @@ internal static class PageOverlayer {
 
         EventTrigger trigger = go.GetComponent<EventTrigger>();
 
+        GTween bgTween = null;
         UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
-            bgImg.DOKill();
-            bgImg.DOColor(UIColors.ObjectActiveLightBright, 0.12f)
-                 .SetEase(Ease.OutSine)
-                 .SetUpdate(true);
+            bgTween?.Kill();
+            bgTween = bgImg.GTColor(UIColors.ObjectActiveLightBright, 0.12f)
+                .SetEasing(Easing.OutSine);
+            MainCore.TC.Play(bgTween);
         }, trigger);
 
         UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
-            bgImg.DOKill();
-            bgImg.DOColor(UIColors.ObjectButton, 0.12f)
-                 .SetEase(Ease.OutSine)
-                 .SetUpdate(true);
+            bgTween?.Kill();
+            bgTween = bgImg.GTColor(UIColors.ObjectButton, 0.12f)
+                .SetEasing(Easing.OutSine);
+            MainCore.TC.Play(bgTween);
         }, trigger);
 
         return go;
     }
+
+    private static GTween fadeTween;
     private static void FadeCanvasGroup(CanvasGroup cg, float targetAlpha, bool setActive, bool noAnimate = false) {
         if(cg == null) {
             return;
         }
 
+        fadeTween?.Kill();
+
         if(setActive) {
             cg.gameObject.SetActive(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(cg.GetComponent<RectTransform>());
         }
-
-        cg.DOKill();
 
         if(noAnimate) {
             cg.alpha = targetAlpha;
@@ -299,21 +319,23 @@ internal static class PageOverlayer {
                 cg.gameObject.SetActive(false);
             }
         } else {
-            bool shouldBlock = targetAlpha > 0;
+            cg.blocksRaycasts = targetAlpha > 0;
 
-            cg.blocksRaycasts = shouldBlock;
-            cg.DOFade(targetAlpha, 0.25f).SetUpdate(true)
-              .SetEase(Ease.OutCubic)
-              .OnComplete(() => {
-                  cg.blocksRaycasts = setActive;
-                  if(!setActive) {
-                      cg.gameObject.SetActive(false);
-                  }
-              });
+            fadeTween = cg.GTFade(targetAlpha, 0.25f)
+                .SetEasing(Easing.OutCubic)
+                .OnComplete(() => {
+                    if(!setActive) {
+                        cg.gameObject.SetActive(false);
+                    }
+                });
+
+            MainCore.TC.Play(fadeTween);
         }
     }
 
+    [RegisterIl2Cpp]
     public class GridRatioKeeper : MonoBehaviour {
+
         private RectTransform rectTransform;
         private GridLayoutGroup gridLayout;
         private RectTransform contentRect;

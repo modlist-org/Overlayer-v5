@@ -48,7 +48,7 @@ public class UserTexture2D : UserResourceBase<(Texture2D texture, Texture2DSetti
 
             return Result.Success;
         } catch(Exception e) {
-            MainCore.Logger.Err($"[{nameof(UserTexture2D)}] Texture load failed: {e}");
+            MainCore.Log.Err($"[{nameof(UserTexture2D)}] Texture load failed: {e}");
             return Result.Failed;
         }
     }
@@ -68,7 +68,7 @@ public class UserTexture2D : UserResourceBase<(Texture2D texture, Texture2DSetti
 
     public void Deserialize(JToken token) {
         if(token is not JObject obj) {
-            MainCore.Logger.Wrn(
+            MainCore.Log.Wrn(
                 $"[{nameof(UserTexture2D)}] Deserialize failed: token is not JObject"
             );
             return;
@@ -76,7 +76,7 @@ public class UserTexture2D : UserResourceBase<(Texture2D texture, Texture2DSetti
 
         foreach(var property in obj.Properties()) {
             if(property.Value is not JObject entry) {
-                MainCore.Logger.Wrn(
+                MainCore.Log.Wrn(
                     $"[{nameof(UserTexture2D)}] Invalid entry {{ \"{property.Name}\": null }}"
                 );
                 continue;
@@ -100,7 +100,7 @@ public class UserTexture2D : UserResourceBase<(Texture2D texture, Texture2DSetti
             );
 
             if(result != Result.Success) {
-                MainCore.Logger.Wrn(
+                MainCore.Log.Wrn(
                     $"[{nameof(UserTexture2D)}] {result} {{ \"{property.Name}\": \"{path}\" }}"
                 );
             }

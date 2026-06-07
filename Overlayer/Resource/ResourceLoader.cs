@@ -9,10 +9,10 @@ public static class ResourceLoader {
         }
 
         try {
-            using var stream = MainCore.Assembly?.GetManifestResourceStream(resourceName);
+            using var stream = MainCore.Asm?.GetManifestResourceStream(resourceName);
 
             if(stream == null) {
-                MainCore.Logger.Wrn($"Resource not found: {resourceName}");
+                MainCore.Log.Wrn($"Resource not found: {resourceName}");
                 return null;
             }
 
@@ -42,11 +42,11 @@ public static class ResourceLoader {
                 return data;
             }
 
-            MainCore.Logger.Wrn($"Incomplete resource read: {resourceName}");
+            MainCore.Log.Wrn($"Incomplete resource read: {resourceName}");
             return null;
 
         } catch(Exception e) {
-            MainCore.Logger.Err($"Failed to load resource '{resourceName}': {e}");
+            MainCore.Log.Err($"Failed to load resource '{resourceName}': {e}");
             return null;
         }
     }

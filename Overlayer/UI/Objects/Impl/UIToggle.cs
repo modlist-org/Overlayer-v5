@@ -1,9 +1,19 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Resource;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using GTweens.Tweens;
+using GTweens.Extensions;
+using Overlayer.Tween;
+
+using GTweens.Builders;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Objects.Impl;
 
@@ -16,8 +26,8 @@ public class UIToggle : UIObject {
     public Image ChangedImage { get; }
     public RectTransform CircleRect { get; }
 
-    private Sequence circleSeq;
-    private Sequence changeSeq;
+    private GTween circleSeq;
+    private GTween changeSeq;
 
     public UIToggle(
         string id,
@@ -79,25 +89,24 @@ public class UIToggle : UIObject {
             return;
         }
 
-        circleSeq = DOTween.Sequence().SetUpdate(true)
+        circleSeq = GTweenSequenceBuilder.New()
             .Join(
-                DOTween.To(
+                GTweenExtensions.Tween(
                     () => CircleRect.sizeDelta.x,
-                    x => CircleRect.sizeDelta = new(x, x),
+                    x => CircleRect.sizeDelta = new Vector2(x, x),
                     26f,
                     0.3f
-                ).SetEase(Ease.OutQuad)
+                ).SetEasing(Easing.OutQuad)
             )
             .Join(
-                CircleImage.DOColor(
-                    Value ? UIColors.ObjectActive : UIColors.ObjectInactive,
-                    0.15f
-                ).SetEase(Ease.OutQuad)
-            );
+                CircleImage.GTColor(Value ? UIColors.ObjectActive : UIColors.ObjectInactive, 0.15f)
+                    .SetEasing(Easing.OutQuad)
+            ).Build();
+        MainCore.TC.Play(circleSeq);
 
-        changeSeq = DOTween.Sequence().SetUpdate(true)
+        changeSeq = GTweenSequenceBuilder.New()
             .Append(
-                DOTween.To(
+                GTweenExtensions.Tween(
                     () => ChangedImage.color.a,
                     x => {
                         Color c = ChangedImage.color;
@@ -106,7 +115,8 @@ public class UIToggle : UIObject {
                     },
                     target,
                     0.2f
-                ).SetEase(Ease.OutSine)
-            );
+                ).SetEasing(Easing.OutSine)
+            ).Build();
+        MainCore.TC.Play(changeSeq);
     }
 }

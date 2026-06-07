@@ -1,6 +1,11 @@
 ﻿using Overlayer.Core;
-using TMPro;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.Localization;
 

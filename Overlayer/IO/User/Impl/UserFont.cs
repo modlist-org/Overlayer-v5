@@ -1,8 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
 using Overlayer.Core;
 using Overlayer.IO.Interface;
-using TMPro;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.IO.User.Impl;
 
@@ -42,7 +47,7 @@ public class UserFont : UserResourceBase<TMP_FontAsset>, ISettingsFile {
 
             return Result.Success;
         } catch(Exception e) {
-            MainCore.Logger.Err($"{nameof(UserResourceManager)} Font load failed: {e}");
+            MainCore.Log.Err($"{nameof(UserResourceManager)} Font load failed: {e}");
             return Result.Failed;
         }
     }
@@ -59,7 +64,7 @@ public class UserFont : UserResourceBase<TMP_FontAsset>, ISettingsFile {
 
     public void Deserialize(JToken token) {
         if(token is not JObject obj) {
-            MainCore.Logger.Wrn($"[{nameof(UserFont)}] Deserialize failed: token is not JObject");
+            MainCore.Log.Wrn($"[{nameof(UserFont)}] Deserialize failed: token is not JObject");
             return;
         }
 
@@ -70,7 +75,7 @@ public class UserFont : UserResourceBase<TMP_FontAsset>, ISettingsFile {
             var result = Load(key, path);
 
             if(result != Result.Success) {
-                MainCore.Logger.Wrn(
+                MainCore.Log.Wrn(
                     $"[{nameof(UserFont)}] {result} {{ \"{property.Name}\": \"{path}\" }}"
                 );
             }

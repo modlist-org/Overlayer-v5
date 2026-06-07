@@ -1,4 +1,5 @@
 //using Microsoft.ClearScript.V8;
+using GTweens.Contexts;
 using Overlayer.Async;
 using Overlayer.Compat;
 using Overlayer.Compat.Interface;
@@ -36,6 +37,8 @@ public sealed class OverlayerRuntime {
 
     public GameObject RootObject { get; private set; }
 
+    public GTweensContext TweensContext { get; }
+
     //public V8ScriptEngine V8Engine { get; private set; }
 
     public readonly IOverlayerHost Host;
@@ -44,6 +47,7 @@ public sealed class OverlayerRuntime {
     private readonly RuntimeTicks ticks;
 
     private UIService uiService;
+    private TweenService tweenService;
     private ModuleService moduleService;
 
     public OverlayerRuntime(IOverlayerHost host) {
@@ -69,6 +73,7 @@ public sealed class OverlayerRuntime {
         Sprite = new SpriteManager(Resource);
         services = new RuntimeServices();
         ticks = new RuntimeTicks();
+        TweensContext = new GTweensContext();
     }
 
     public void Initialize() {
@@ -83,12 +88,15 @@ public sealed class OverlayerRuntime {
         Localization = new LocalizationService(Paths.LangPath, Config, Logger);
 
         uiService = new UIService();
+        tweenService = new TweenService(TweensContext);
         moduleService = new ModuleService(Logger);
 
         services.Add(Localization);
         services.Add(uiService);
+        services.Add(tweenService);
 
         ticks.Add(uiService);
+        ticks.Add(tweenService);
 
         services.Initialize();
 

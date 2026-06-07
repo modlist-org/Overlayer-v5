@@ -1,10 +1,19 @@
-﻿using DG.Tweening;
-using Overlayer.Core;
+﻿using Overlayer.Core;
 using Overlayer.Resource;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using GTweens.Tweens;
+using GTweens.Extensions;
+
+using GTweens.Builders;
+using GTweens.Easings;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI;
 
@@ -62,11 +71,11 @@ public class Tooltip {
     }
 
     public static void Tick() {
-        if(!MainCore.Config.Tooltip || !visible || obj == null) {
+        if(!MainCore.Conf.Tooltip || !visible || obj == null) {
             return;
         }
 
-        float scale = MainCore.Config.UIScale;
+        float scale = MainCore.Conf.UIScale;
 
         Vector2 mouse = Input.mousePosition;
 
@@ -89,10 +98,10 @@ public class Tooltip {
         );
     }
 
-    private static Sequence seq;
+    private static GTween seq;
 
     public static void Show(string tip) {
-        if(!MainCore.Config.Tooltip || obj == null) {
+        if(!MainCore.Conf.Tooltip || obj == null) {
             return;
         }
 
@@ -109,34 +118,40 @@ public class Tooltip {
         canvas.alpha = 0f;
         visible = true;
 
-        seq = DOTween.Sequence().SetUpdate(true)
-            .AppendInterval(0.14f)
-            .Append(DOTween.To(
-                () => canvas.alpha,
-                x => canvas.alpha = x,
-                1f,
-                0.16f
-            ).SetEase(Ease.OutSine));
+        seq = GTweenSequenceBuilder.New()
+            .AppendTime(0.14f)
+            .Append(
+                GTweenExtensions.Tween(
+                    () => canvas.alpha,
+                    x => canvas.alpha = x,
+                    1f,
+                    0.16f
+                ).SetEasing(Easing.OutSine)
+            )
+            .Build();
+        MainCore.TC.Play(seq);
     }
 
     public static void Hide() {
-        if(!MainCore.Config.Tooltip || obj == null) {
+        if(!MainCore.Conf.Tooltip || obj == null) {
             return;
         }
 
         seq?.Kill();
-
-        seq = DOTween.Sequence().SetUpdate(true)
-            .Append(DOTween.To(
-                () => canvas.alpha,
-                x => canvas.alpha = x,
-                0f,
-                0.16f
-            ).SetEase(Ease.OutSine))
-            .OnComplete(() => {
+        seq = GTweenSequenceBuilder.New()
+            .Append(
+                GTweenExtensions.Tween(
+                    () => canvas.alpha,
+                    x => canvas.alpha = x,
+                    0f,
+                    0.16f
+                ).SetEasing(Easing.OutSine)
+            )
+            .AppendCallback(() => {
                 visible = false;
                 obj.SetActive(false);
-            });
+            }).Build();
+        MainCore.TC.Play(seq);
     }
 
     public static void Dispose() {

@@ -49,12 +49,12 @@ public static class SignatureResolver {
         }
 
         if(format != null) {
-            if(!FormatValidator.TryValidate(tag.ReturnType, format, out var ex)) {
+            if(!FormatValidator.TryValidate(tag.ReturnType, format, out var e)) {
                 diag.Add(new(
                     DiagnosticId.FormatFail,
                     CompileSeverity.Error,
                     context,
-                    [format, ex]
+                    [format, e]
                 ));
 
                 return ResolvedSignature.Invalid;
@@ -64,12 +64,12 @@ public static class SignatureResolver {
         for(int i = 0; i < args.Length && i < parameters.Length; i++) {
             try {
                 ArgConverter.Convert(args[i], parameters[i].ParameterType);
-            } catch(Exception ex) {
+            } catch(Exception e) {
                 diag.Add(new CompileDiagnostic(
                 DiagnosticId.ArgConvertFail,
                     CompileSeverity.Error,
                     context,
-                    [i, args[i], parameters[i].ParameterType.Name]
+                    [i, args[i], parameters[i].ParameterType.Name, e]
                 ));
 
                 return ResolvedSignature.Invalid;

@@ -6,6 +6,7 @@ namespace Overlayer.IO;
 public sealed class CoreSettings : ISettingsFile {
     public bool Active = true;
     public string Language = "en-US";
+    public bool IsFirstRun = true;
     public bool ShowOnStartup = false;
     public bool Tooltip = true;
     public bool MiddleClickToDefault = true;
@@ -15,6 +16,7 @@ public sealed class CoreSettings : ISettingsFile {
         return new JObject {
             [nameof(Active)] = Active,
             [nameof(Language)] = Language,
+            [nameof(IsFirstRun)] = IsFirstRun,
             [nameof(ShowOnStartup)] = ShowOnStartup,
             [nameof(Tooltip)] = Tooltip,
             [nameof(MiddleClickToDefault)] = MiddleClickToDefault,
@@ -25,6 +27,7 @@ public sealed class CoreSettings : ISettingsFile {
     public void Deserialize(JToken token) {
         Active = IOUtils.Read(token, nameof(Active), Active);
         Language = IOUtils.Read(token, nameof(Language), Language);
+        IsFirstRun = IOUtils.Read(token, nameof(IsFirstRun), IsFirstRun);
         ShowOnStartup = IOUtils.Read(token, nameof(ShowOnStartup), ShowOnStartup);
         Tooltip = IOUtils.Read(token, nameof(Tooltip), Tooltip);
         MiddleClickToDefault = IOUtils.Read(token, nameof(MiddleClickToDefault), MiddleClickToDefault);

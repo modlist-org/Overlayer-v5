@@ -1,16 +1,24 @@
-﻿using DG.Tweening;
-using Overlayer.UI;
+﻿using Overlayer.UI;
 using Overlayer.UI.Objects;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using GTweens.Tweens;
+using Overlayer.Tween;
+using GTweens.Easings;
+using Overlayer.Core;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 public class UIButton : UIObject {
     public Action OnClick { get; set; }
     public TextMeshProUGUI Label { get; }
     public Image Background { get; }
 
-    private Tween hoverTween;
+    private GTween hoverTween;
 
     public UIButton(
         string id,
@@ -30,18 +38,18 @@ public class UIButton : UIObject {
         hoverTween?.Kill();
 
         hoverTween = Background
-            .DOColor(UIColors.ObjectActiveLightBright, 0.12f)
-            .SetEase(Ease.OutSine)
-            .SetUpdate(true);
+            .GTColor(UIColors.ObjectActiveLightBright, 0.12f)
+            .SetEasing(Easing.OutSine);
+        MainCore.TC.Play(hoverTween);
     }
 
     public void OnHoverExit() {
         hoverTween?.Kill();
 
         hoverTween = Background
-            .DOColor(UIColors.ObjectButton, 0.12f)
-            .SetEase(Ease.OutSine)
-            .SetUpdate(true);
+            .GTColor(UIColors.ObjectButton, 0.12f)
+            .SetEasing(Easing.OutSine);
+        MainCore.TC.Play(hoverTween);
     }
 
     public void Click(bool invoke = true) {
@@ -61,8 +69,8 @@ public class UIButton : UIObject {
         }
 
         hoverTween = Background
-            .DOColor(UIColors.ObjectButton, 0.2f)
-            .SetEase(Ease.OutSine)
-            .SetUpdate(true);
+            .GTColor(UIColors.ObjectButton, 0.2f)
+            .SetEasing(Easing.OutSine);
+        MainCore.TC.Play(hoverTween);
     }
 }

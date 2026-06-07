@@ -1,7 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using Overlayer.IO.Interface;
-using TMPro;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.IO.UnityComponent.Impl;
 

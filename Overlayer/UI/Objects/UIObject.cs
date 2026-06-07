@@ -1,4 +1,7 @@
-﻿using DG.Tweening;
+﻿using GTweens.Builders;
+using GTweens.Easings;
+using GTweens.Extensions;
+using GTweens.Tweens;
 using Overlayer.Core;
 using UnityEngine;
 
@@ -33,7 +36,7 @@ public abstract class UIObject {
             return field;
         }
     }
-    private Sequence blockSeq;
+    private GTween blockSeq;
 
     protected UIObject(string id, RectTransform rect) {
         Id = id;
@@ -61,13 +64,16 @@ public abstract class UIObject {
             return;
         }
 
-        blockSeq = DOTween.Sequence().SetUpdate(true)
-            .Join(DOTween.To(
-                () => CanvasGroup.alpha,
-                x => CanvasGroup.alpha = x,
-                targetAlpha,
-                0.2f
-            ).SetEase(Ease.OutSine));
+        blockSeq = GTweenSequenceBuilder.New()
+            .Join(
+                GTweenExtensions.Tween(
+                    () => CanvasGroup.alpha,
+                    x => CanvasGroup.alpha = x,
+                    targetAlpha,
+                    0.2f
+                ).SetEasing(Easing.OutSine)
+            ).Build();
+        MainCore.TC.Play(blockSeq);
     }
 
     public virtual void Dispose() => UnregisterTick();

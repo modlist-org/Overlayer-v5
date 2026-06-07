@@ -1,8 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
 using Overlayer.IO;
 using Overlayer.IO.Interface;
-using TMPro;
 using UnityEngine;
+
+#if IL2CPP
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 /// <summary>
 /// Represents a color that supports either a solid color mode or a 4-corner vertex gradient mode.

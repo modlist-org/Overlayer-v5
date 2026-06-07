@@ -28,9 +28,9 @@ public static class TagManager {
         }
 
         if(isFirstInit) {
-            MainCore.Logger.Msg($"[{nameof(TagManager)}] Initialization started");
+            MainCore.Log.Msg($"[{nameof(TagManager)}] Initialization started");
         } else {
-            MainCore.Logger.Msg($"[{nameof(TagManager)}] Already initialized / returning existing task");
+            MainCore.Log.Msg($"[{nameof(TagManager)}] Already initialized / returning existing task");
         }
 
         return task;
@@ -40,7 +40,7 @@ public static class TagManager {
         try {
             var list = TagLoader.LoadAsync(asm).GetAwaiter().GetResult();
 
-            MainCore.Logger.Msg($"[{nameof(TagManager)}] Loaded tags: {list.Count}");
+            MainCore.Log.Msg($"[{nameof(TagManager)}] Loaded tags: {list.Count}");
 
             var dict = new Dictionary<string, TagCore>(list.Count);
 
@@ -50,9 +50,9 @@ public static class TagManager {
 
             _tags = dict;
 
-            MainCore.Logger.Msg($"[{nameof(TagManager)}] Initialization completed. Total: {_tags.Count}");
+            MainCore.Log.Msg($"[{nameof(TagManager)}] Initialization completed. Total: {_tags.Count}");
         } catch(Exception ex) {
-            MainCore.Logger.Msg($"[{nameof(TagManager)}] Initialization failed: {ex}");
+            MainCore.Log.Msg($"[{nameof(TagManager)}] Initialization failed: {ex}");
             throw;
         }
     }
@@ -69,7 +69,7 @@ public static class TagManager {
 
             _tags = newMap;
         }
-        MainCore.Logger.Msg($"[{nameof(TagManager)}] Tag updated: {tag.Name}");
+        MainCore.Log.Msg($"[{nameof(TagManager)}] Tag updated: {tag.Name}");
     }
 
     public static void Dispose() {
@@ -79,6 +79,6 @@ public static class TagManager {
 
         _initTask = null;
 
-        MainCore.Logger.Msg($"[{nameof(TagManager)}] Disposed");
+        MainCore.Log.Msg($"[{nameof(TagManager)}] Disposed");
     }
 }

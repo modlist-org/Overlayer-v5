@@ -4,4 +4,5 @@
 public sealed class TagAttribute : Attribute {
     public string Name { get; set; }
     public TagType TagType { get; set; }
+    public string Desc { get; set; }
 }
