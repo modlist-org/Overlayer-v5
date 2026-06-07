@@ -118,7 +118,6 @@ internal static class PageOverlayer {
 
     private static void BuildAllTiles(Transform transform) {
         if(transform == null) {
-            MainCore.Log.Msg("?????");
             return;
         }
 
