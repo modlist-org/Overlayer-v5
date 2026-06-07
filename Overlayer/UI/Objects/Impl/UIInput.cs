@@ -144,6 +144,7 @@ public sealed class UIInput : UIObject {
             caretTween?.Kill();
             if(caretLooping) {
                 caretTween = CreateCaretLoop();
+                MainCore.TC.Play(caretTween);
                 return;
             }
 
@@ -162,22 +163,21 @@ public sealed class UIInput : UIObject {
                 .AppendCallback(() => {
                     caretTween?.Kill();
                     caretTween = CreateCaretLoop();
+                    MainCore.TC.Play(caretTween);
                 }).Build();
-
+            MainCore.TC.Play(caretTween);
             return;
         }
 
-        if(!caretLooping) {
+        if(!caretLooping)
             return;
-        }
-
         caretLooping = false;
 
         caretTween?.Kill();
         caretTween = GTweenExtensions.Tween(
             () => InputField.caretColor.a,
             x => {
-                var c = InputField.caretColor;
+                var c = UIColors.ObjectActive;
                 c.a = x;
                 InputField.caretColor = c;
             },
@@ -192,7 +192,7 @@ public sealed class UIInput : UIObject {
             .Append(GTweenExtensions.Tween(
                 () => InputField.caretColor.a,
                 x => {
-                    var c = InputField.caretColor;
+                    var c = UIColors.ObjectActive;
                     c.a = x;
                     InputField.caretColor = c;
                 },
@@ -202,13 +202,14 @@ public sealed class UIInput : UIObject {
             .Append(GTweenExtensions.Tween(
                 () => InputField.caretColor.a,
                 x => {
-                    var c = InputField.caretColor;
+                    var c = UIColors.ObjectActive;
                     c.a = x;
                     InputField.caretColor = c;
                 },
                 0.4f,
                 0.62f
-            ).SetEasing(Easing.OutSine)).Build();
+            ).SetEasing(Easing.OutSine))
+            .Build().SetMaxLoops();
     }
 
     private void UpdatePlaceholder(bool focused) {
