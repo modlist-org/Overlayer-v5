@@ -57,11 +57,15 @@ public class PageSwicher {
                     .Build()
             )
             .Join(toCg.GTFade(1f, 0.3f))
-            .AppendTime(0.1f)
-            .AppendCallback(() => {
-                toCg.interactable = true;
-                toCg.blocksRaycasts = true;
-            })
+            .Join(
+                GTweenSequenceBuilder.New()
+                    .AppendTime(0.1f)
+                    .AppendCallback(() => {
+                        toCg.interactable = true;
+                        toCg.blocksRaycasts = true;
+                    })
+                    .Build()
+            )
             .Build();
 
         MainCore.TC.Play(pageSeq);

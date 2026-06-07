@@ -9,6 +9,8 @@ using static UnityEngine.EventSystems.PointerEventData;
 using GTweens.Tweens;
 using Overlayer.Tween;
 using GTweens.Easings;
+using GTweens.Builders;
+
 
 #if IL2CPP
 using Il2CppTMPro;
@@ -177,8 +179,14 @@ public class OvCanvasSettingPage : IDisposable {
             CanvasGroup.blocksRaycasts = true;
         } else {
             canvasFadeTween?.Kill();
-            canvasFadeTween = CanvasGroup.GTFade(1f, 0.25f).SetEasing(Easing.OutCubic)
-                .OnComplete(() => CanvasGroup.blocksRaycasts = true);
+            canvasFadeTween = GTweenSequenceBuilder.New()
+                .Join(CanvasGroup.GTFade(1f, 0.25f).SetEasing(Easing.OutCubic))
+                .Join(
+                    GTweenSequenceBuilder.New()
+                        .AppendTime(0.1f)
+                        .AppendCallback(() => CanvasGroup.blocksRaycasts = true)
+                        .Build()
+                    ).Build();
             MainCore.TC.Play(canvasFadeTween);
         }
     }
