@@ -1,10 +1,9 @@
 ﻿using GTweens.Easings;
 using GTweens.Extensions;
 using GTweens.Tweens;
+using Overlayer.Compat.OVC;
 using Overlayer.Core;
 using UnityEngine;
-using Overlayer.Compat.OVC;
-
 
 #if ML && IL2CPP
 using MelonLoader;

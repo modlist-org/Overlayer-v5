@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using Overlayer.Core;
+using System.Collections.Concurrent;
 using UnityEngine;
-using Overlayer.Core;
 
 #if ML && IL2CPP
 using MelonLoader;

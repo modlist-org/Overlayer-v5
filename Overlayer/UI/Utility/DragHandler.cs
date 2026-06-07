@@ -1,7 +1,6 @@
-﻿using UnityEngine;
+﻿using Overlayer.Compat.OVC;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using Overlayer.Compat.OVC;
-
 
 #if ML && IL2CPP
 using MelonLoader;
@@ -22,46 +21,48 @@ public class DragHandler
 {
 
     private RectTransform rect;
-    private Canvas canvas;
     private Vector2 offset;
 
     private void Awake() {
-        rect = transform.parent.GetComponent<RectTransform>();
-        canvas = GetComponentInParent<Canvas>();
+        rect = transform.parent?.GetComponent<RectTransform>();
+        SetupEvents();
+    }
 
+    private void SetupEvents() {
         var trigger = gameObject.AddComponent<EventTrigger>();
 
         var downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
         downEntry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((_) =>
-#else
-            (_) => 
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-            OnPointerDownInternal()
-#if ML && IL2CPP
-            ))
+                (_) => OnPointerDownInternal()
+#if ML && IL2CPP 
+                ))
 #endif
-        );
+            );
         trigger.triggers.Add(downEntry);
 
         var dragEntry = new EventTrigger.Entry { eventID = EventTriggerType.Drag };
         dragEntry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((_) =>
-#else
-            (_) => 
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-            OnDragInternal()
+                (_) => OnDragInternal()
 #if ML && IL2CPP
-            ))
+                ))
 #endif
-        );
+            );
         trigger.triggers.Add(dragEntry);
+
     }
 
     private void OnPointerDownInternal() {
-        if(rect == null || canvas == null) {
+        if(rect == null) {
+            rect = transform.parent?.GetComponent<RectTransform>();
+        }
+
+        if(rect == null) {
             return;
         }
 
@@ -77,26 +78,18 @@ public class DragHandler
     private void OnDragInternal() {
         if(rect == null) {
             rect = transform.parent?.GetComponent<RectTransform>();
-            if(rect == null) {
-                return;
-            }
-        }
-        if(canvas == null) {
-            canvas = GetComponentInParent<Canvas>();
-            if(canvas == null) {
-                return;
-            }
         }
 
-        Camera cam = (canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : canvas.worldCamera;
+        if(rect == null) {
+            return;
+        }
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rect,
+            rect.parent as RectTransform,
             OVC_Input.MousePosition,
-            cam,
+            null,
             out Vector2 localPoint
         );
-
         rect.anchoredPosition = localPoint + offset;
     }
 }

@@ -1,10 +1,9 @@
-﻿using Overlayer.Core;
+﻿using Overlayer.Compat.OVC;
+using Overlayer.Core;
 using Overlayer.Resource;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Overlayer.Compat.OVC;
-
 
 #if ML && IL2CPP
 using MelonLoader;
@@ -51,136 +50,87 @@ public class ResizeHandle
         var trigger = gameObject.AddComponent<EventTrigger>();
 
         var downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
-
         downEntry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((_) =>
-#else
-            (_) =>
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-                OnPointerDownInternal()
+                (_) => OnPointerDownInternal()
 #if ML && IL2CPP
-            ))
+                ))
 #endif
-        );
+            );
         trigger.triggers.Add(downEntry);
 
         var dragEntry = new EventTrigger.Entry { eventID = EventTriggerType.Drag };
         dragEntry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((_) =>
-#else
-            (_) =>
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-                OnDragInternal()
+                (_) => OnDragInternal()
 #if ML && IL2CPP
-            ))
+                ))
 #endif
-        );
+            );
         trigger.triggers.Add(dragEntry);
     }
 
     private void OnPointerDownInternal() {
-        RectTransform parentRect = transform.parent?.GetComponent<RectTransform>();
-
-        if(!parentRect) {
-            return;
-        }
+        startSize = Panel.sizeDelta;
+        startPos = Panel.anchoredPosition;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            parentRect,
+            Panel.parent as RectTransform,
             OVC_Input.MousePosition,
             null,
             out startMouse
         );
-
-        startSize = Panel.sizeDelta;
-        startPos = Panel.anchoredPosition;
     }
 
-    private void OnDragInternal() {
-        RectTransform parentRect = transform.parent?.GetComponent<RectTransform>();
-
-        if(!parentRect) {
-            return;
-        }
-
+    public void OnDragInternal() {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            parentRect,
+            Panel.parent as RectTransform,
             OVC_Input.MousePosition,
             null,
             out Vector2 currentMouse
         );
 
         Vector2 delta = currentMouse - startMouse;
+        Vector2 newSize = startSize;
+        Vector2 newPos = startPos;
 
-        float width = startSize.x;
-        float height = startSize.y;
+        float minW = MIN_WIDTH / MainCore.Conf.UIScale;
+        float minH = MIN_HEIGHT / MainCore.Conf.UIScale;
 
-        Vector2 pos = startPos;
+        Vector2 pivot = Panel.pivot;
 
-        // RIGHT
-        if(Type is ResizeHandleType.Right
-            or ResizeHandleType.TopRight
-            or ResizeHandleType.BottomRight) {
-            float newWidth = Mathf.Max(
-                MIN_WIDTH / MainCore.Conf.UIScale,
-                startSize.x + delta.x
-            );
-
-            float applied = newWidth - startSize.x;
-
-            width = newWidth;
-            pos.x += applied * 0.5f;
+        if(Type is ResizeHandleType.Right or ResizeHandleType.TopRight or ResizeHandleType.BottomRight) {
+            newSize.x = Mathf.Max(minW, startSize.x + delta.x);
+        } else if(Type is ResizeHandleType.Left or ResizeHandleType.TopLeft or ResizeHandleType.BottomLeft) {
+            newSize.x = Mathf.Max(minW, startSize.x - delta.x);
         }
 
-        // LEFT
-        if(Type is ResizeHandleType.Left
-            or ResizeHandleType.TopLeft
-            or ResizeHandleType.BottomLeft) {
-            float newWidth = Mathf.Max(
-                MIN_WIDTH / MainCore.Conf.UIScale,
-                startSize.x - delta.x
-            );
-
-            float applied = newWidth - startSize.x;
-
-            width = newWidth;
-            pos.x -= applied * 0.5f;
+        if(Type is ResizeHandleType.Top or ResizeHandleType.TopLeft or ResizeHandleType.TopRight) {
+            newSize.y = Mathf.Max(minH, startSize.y + delta.y);
+        } else if(Type is ResizeHandleType.Bottom or ResizeHandleType.BottomLeft or ResizeHandleType.BottomRight) {
+            newSize.y = Mathf.Max(minH, startSize.y - delta.y);
         }
 
-        // TOP
-        if(Type is ResizeHandleType.Top
-            or ResizeHandleType.TopLeft
-            or ResizeHandleType.TopRight) {
-            float newHeight = Mathf.Max(
-                MIN_HEIGHT / MainCore.Conf.UIScale,
-                startSize.y + delta.y
-            );
+        Vector2 sizeDiff = newSize - startSize;
 
-            float applied = newHeight - startSize.y;
-
-            height = newHeight;
-            pos.y += applied * 0.5f;
+        if(Type is ResizeHandleType.Right or ResizeHandleType.TopRight or ResizeHandleType.BottomRight) {
+            newPos.x = startPos.x + (sizeDiff.x * (1f - pivot.x));
+        } else if(Type is ResizeHandleType.Left or ResizeHandleType.TopLeft or ResizeHandleType.BottomLeft) {
+            newPos.x = startPos.x - (sizeDiff.x * pivot.x);
         }
 
-        // BOTTOM
-        if(Type is ResizeHandleType.Bottom
-            or ResizeHandleType.BottomLeft
-            or ResizeHandleType.BottomRight) {
-            float newHeight = Mathf.Max(
-                MIN_HEIGHT / MainCore.Conf.UIScale,
-                startSize.y - delta.y
-            );
-
-            float applied = newHeight - startSize.y;
-
-            height = newHeight;
-            pos.y -= applied * 0.5f;
+        if(Type is ResizeHandleType.Top or ResizeHandleType.TopLeft or ResizeHandleType.TopRight) {
+            newPos.y = startPos.y + (sizeDiff.y * (1f - pivot.y));
+        } else if(Type is ResizeHandleType.Bottom or ResizeHandleType.BottomLeft or ResizeHandleType.BottomRight) {
+            newPos.y = startPos.y - (sizeDiff.y * pivot.y);
         }
 
-        Panel.sizeDelta = new(width, height);
-        Panel.anchoredPosition = pos;
+        Panel.sizeDelta = newSize;
+        Panel.anchoredPosition = newPos;
     }
 
     private static readonly ResizeHandleType[] HandleOrder = {

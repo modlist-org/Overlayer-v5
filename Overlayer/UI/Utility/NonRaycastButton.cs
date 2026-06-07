@@ -1,14 +1,12 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Overlayer.Core;
-
 
 #if ML && IL2CPP
 using MelonLoader;
 using Il2CppInterop.Runtime;
 #endif
 
-namespace Overlayer.UI.Utility; 
+namespace Overlayer.UI.Utility;
 #if ML && IL2CPP
 [RegisterTypeInIl2Cpp]
 #endif
@@ -30,12 +28,8 @@ public class NonRaycastButton
         entry.callback.AddListener(
 #if ML && IL2CPP
             DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((e) =>
-#else            
-            (e) =>
 #endif
-            {
-                OnClickInternal();
-            }
+            (e) => OnClickInternal()
 #if ML && IL2CPP
             ))
 #endif
@@ -43,7 +37,5 @@ public class NonRaycastButton
         trigger.triggers.Add(entry);
     }
 
-    private void OnClickInternal() {
-        onClick?.Invoke();
-    }
+    private void OnClickInternal() => onClick?.Invoke();
 }
