@@ -85,6 +85,10 @@ internal static class PageSettings {
 
                 string normalizedQuery = StringUtils.Normalize(value);
 
+                if (MainCore.Conf.Language == "ko-KR") {
+                    normalizedQuery = StringUtils.NormalizeToHangulChosung(normalizedQuery);
+                }
+
                 foreach(var (labelLoc, valueTuple) in objects) {
                     var (labelRow, mainRow) = valueTuple;
 
@@ -93,8 +97,15 @@ internal static class PageSettings {
                     }
 
                     string normalizedTarget = labelLoc != null ? StringUtils.Normalize(labelLoc.Value) : string.Empty;
+                    if (MainCore.Conf.Language == "ko-KR" && !string.IsNullOrEmpty(normalizedTarget)) {
+                        normalizedTarget = StringUtils.NormalizeToHangulChosung(normalizedTarget);
+                    }
 
-                    bool isMainMatch = isBlank || (!string.IsNullOrEmpty(normalizedTarget) && normalizedTarget.Contains(normalizedQuery));
+                    bool isMainMatch = isBlank
+                        || (
+                            !string.IsNullOrEmpty(normalizedTarget)
+                            && normalizedTarget.Contains(normalizedQuery)
+                        );
 
                     mainRow.SetActive(isMainMatch);
 
