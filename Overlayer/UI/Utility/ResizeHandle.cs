@@ -38,6 +38,7 @@ public class ResizeHandle
 
     public ResizeHandleType Type;
     public RectTransform Panel;
+    public RectTransform PanelParent;
 
     private Vector2 startMouse;
     private Vector2 startSize;
@@ -79,7 +80,7 @@ public class ResizeHandle
         startPos = Panel.anchoredPosition;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            Panel.parent as RectTransform,
+            PanelParent,
             OVC_Input.MousePosition,
             null,
             out startMouse
@@ -88,7 +89,7 @@ public class ResizeHandle
 
     public void OnDragInternal() {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            Panel.parent as RectTransform,
+            PanelParent,
             OVC_Input.MousePosition,
             null,
             out Vector2 currentMouse
@@ -146,13 +147,12 @@ public class ResizeHandle
         ResizeHandleType.BottomRight
     };
 
-    private const float HANDLE_CORNER = 32f;
-    private const float HANDLE_SIDE = 10f;
-
-    public static void CreateResizeHandles(RectTransform parent) {
+    private const float HANDLE_CORNER = 26f;
+    private const float HANDLE_SIDE = 12f;
+    public static void CreateResizeHandles(RectTransform panel, RectTransform panelParent) {
         foreach(ResizeHandleType type in HandleOrder) {
             GameObject handle = new($"Resize_{type}");
-            handle.transform.SetParent(parent, false);
+            handle.transform.SetParent(panel, false);
 
             RectTransform rect =
                 handle.AddComponent<RectTransform>();
@@ -171,100 +171,68 @@ public class ResizeHandle
             }
 
             switch(type) {
-                // Top
                 case ResizeHandleType.Top:
                     rect.anchorMin = new(0, 1);
                     rect.anchorMax = new(1, 1);
                     rect.pivot = new(0.5f, 0.5f);
-
-                    rect.offsetMin = new(
-                        HANDLE_SIDE,
-                        -HANDLE_SIDE
-                    );
-
-                    rect.offsetMax = new(
-                        -HANDLE_SIDE,
-                        HANDLE_SIDE
-                    );
+                    rect.offsetMin = new(HANDLE_SIDE, -HANDLE_SIDE);
+                    rect.offsetMax = new(-HANDLE_SIDE, HANDLE_SIDE);
+                    rect.anchoredPosition = Vector2.zero;
                     break;
 
-                // Bottom
                 case ResizeHandleType.Bottom:
                     rect.anchorMin = new(0, 0);
                     rect.anchorMax = new(1, 0);
                     rect.pivot = new(0.5f, 0.5f);
-
-                    rect.offsetMin = new(
-                        HANDLE_SIDE,
-                        -HANDLE_SIDE
-                    );
-
-                    rect.offsetMax = new(
-                        -HANDLE_SIDE,
-                        HANDLE_SIDE
-                    );
+                    rect.offsetMin = new(HANDLE_SIDE, -HANDLE_SIDE);
+                    rect.offsetMax = new(-HANDLE_SIDE, HANDLE_SIDE);
+                    rect.anchoredPosition = Vector2.zero;
                     break;
 
-                // Left
                 case ResizeHandleType.Left:
                     rect.anchorMin = new(0, 0);
                     rect.anchorMax = new(0, 1);
                     rect.pivot = new(0.5f, 0.5f);
-
-                    rect.offsetMin = new(
-                        -HANDLE_SIDE,
-                        HANDLE_SIDE
-                    );
-
-                    rect.offsetMax = new(
-                        HANDLE_SIDE,
-                        -HANDLE_SIDE
-                    );
+                    rect.offsetMin = new(-HANDLE_SIDE, HANDLE_SIDE);
+                    rect.offsetMax = new(HANDLE_SIDE, -HANDLE_SIDE);
+                    rect.anchoredPosition = Vector2.zero;
                     break;
 
-                // Right
                 case ResizeHandleType.Right:
                     rect.anchorMin = new(1, 0);
                     rect.anchorMax = new(1, 1);
                     rect.pivot = new(0.5f, 0.5f);
-
-                    rect.offsetMin = new(
-                        -HANDLE_SIDE,
-                        HANDLE_SIDE
-                    );
-
-                    rect.offsetMax = new(
-                        HANDLE_SIDE,
-                        -HANDLE_SIDE
-                    );
+                    rect.offsetMin = new(-HANDLE_SIDE, HANDLE_SIDE);
+                    rect.offsetMax = new(HANDLE_SIDE, -HANDLE_SIDE);
+                    rect.anchoredPosition = Vector2.zero;
                     break;
 
-                // Top Left
                 case ResizeHandleType.TopLeft:
                     rect.anchorMin = new(0, 1);
                     rect.anchorMax = new(0, 1);
                     rect.pivot = new(0.5f, 0.5f);
+                    rect.anchoredPosition = new(-HANDLE_CORNER * 0.5f, HANDLE_CORNER * 0.5f);
                     break;
 
-                // Top Right
                 case ResizeHandleType.TopRight:
                     rect.anchorMin = new(1, 1);
                     rect.anchorMax = new(1, 1);
                     rect.pivot = new(0.5f, 0.5f);
+                    rect.anchoredPosition = new(HANDLE_CORNER * 0.5f, HANDLE_CORNER * 0.5f);
                     break;
 
-                // Bottom Left
                 case ResizeHandleType.BottomLeft:
                     rect.anchorMin = new(0, 0);
                     rect.anchorMax = new(0, 0);
                     rect.pivot = new(0.5f, 0.5f);
+                    rect.anchoredPosition = new(-HANDLE_CORNER * 0.5f, -HANDLE_CORNER * 0.5f);
                     break;
 
-                // Bottom Right
                 case ResizeHandleType.BottomRight:
                     rect.anchorMin = new(1, 0);
                     rect.anchorMax = new(1, 0);
                     rect.pivot = new(0.5f, 0.5f);
+                    rect.anchoredPosition = new(HANDLE_CORNER * 0.5f, -HANDLE_CORNER * 0.5f);
                     break;
             }
 
@@ -277,7 +245,8 @@ public class ResizeHandle
             ResizeHandle resize = handle.AddComponent<ResizeHandle>();
 
             resize.Type = type;
-            resize.Panel = parent;
+            resize.Panel = panel;
+            resize.PanelParent = panelParent;
         }
     }
 }

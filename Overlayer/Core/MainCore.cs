@@ -20,6 +20,7 @@ public static class MainCore {
 
     public static Version Version => Runtime.Version;
     public static Assembly Asm => Runtime.Assembly;
+    public static HarmonyLib.Harmony Har => Runtime.Harmony;
     public static OverlayerLogger Log => Runtime.Logger;
     public static PathService Paths => Runtime.Paths;
     public static SettingsFile<CoreSettings> ConfMgr => Runtime.Config;

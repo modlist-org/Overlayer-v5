@@ -101,12 +101,18 @@ public static class GTweenExtensions {
         }
 
         public GTween GTRotate(Vector3 to, float duration) {
-            var fromRot = target.localRotation;
-            var toRot = Quaternion.Euler(to);
+            Vector3 from = target.localEulerAngles;
+            Vector3 targetAngle = to;
+
+            Vector3 delta = new(
+                Mathf.DeltaAngle(from.x, targetAngle.x),
+                Mathf.DeltaAngle(from.y, targetAngle.y),
+                Mathf.DeltaAngle(from.z, targetAngle.z)
+            );
 
             return GTweens.Extensions.GTweenExtensions.Tween(
                 () => 0f,
-                x => target.localRotation = Quaternion.Slerp(fromRot, toRot, x),
+                x => target.localEulerAngles = from + (delta * x),
                 1f,
                 duration
             );

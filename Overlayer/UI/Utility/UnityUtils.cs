@@ -7,19 +7,13 @@ using Il2CppInterop.Runtime;
 namespace Overlayer.UI.Utility;
 
 public class UnityUtils {
-    public static void AddEvent(EventTriggerType type, Action<PointerEventData> cb, EventTrigger trigger) {
+    public static void AddEvent(EventTriggerType type, Action cb, EventTrigger trigger) {
         var entry = new EventTrigger.Entry { eventID = type };
         entry.callback.AddListener(
 #if ML && IL2CPP
-            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>((e) =>
-#else            
-                (e) =>
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<BaseEventData>>(new Action<BaseEventData>(
 #endif
-                {
-                    if(e is PointerEventData ped) {
-                        cb(ped);
-                    }
-                }
+                (_) => cb()
 #if ML && IL2CPP
             ))
 #endif

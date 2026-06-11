@@ -8,11 +8,10 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 using GTweens.Tweens;
 using Overlayer.Tween;
-
 using GTweens.Builders;
 using GTweens.Easings;
-using GTweens.Extensions;
 using GTweenExtensions = GTweens.Extensions.GTweenExtensions;
+using Overlayer.Compat.OVC;
 
 #if ML && IL2CPP
 using Il2CppTMPro;
@@ -201,7 +200,7 @@ public class UIDropDown<T> : UIObject {
 
             GTween hoverSeq = null;
 
-            UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerEnter, () => {
                 hoverSeq?.Kill();
                 hoverSeq = GTweenSequenceBuilder.New()
                     .Append(rowImage.GTColor(UIColors.ObjectActive, 0.12f).SetEasing(Easing.OutSine))
@@ -209,7 +208,7 @@ public class UIDropDown<T> : UIObject {
                 MainCore.TC.Play(hoverSeq);
             }, trigger);
 
-            UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
+            UnityUtils.AddEvent(EventTriggerType.PointerExit, () => {
                 hoverSeq?.Kill();
                 hoverSeq = GTweenSequenceBuilder.New()
                     .Append(rowImage.GTColor(Color.clear, 0.12f).SetEasing(Easing.OutSine))
@@ -217,8 +216,8 @@ public class UIDropDown<T> : UIObject {
                 MainCore.TC.Play(hoverSeq);
             }, trigger);
 
-            UnityUtils.AddEvent(EventTriggerType.PointerClick, e => {
-                if(e.button != PointerEventData.InputButton.Left) {
+            UnityUtils.AddEvent(EventTriggerType.PointerClick, () => {
+                if(OVC_Input.GetClickMouseButton() != PointerEventData.InputButton.Left) {
                     return;
                 }
 

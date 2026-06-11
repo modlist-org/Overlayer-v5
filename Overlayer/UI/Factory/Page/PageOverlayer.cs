@@ -286,14 +286,14 @@ internal static class PageOverlayer {
         EventTrigger trigger = go.GetComponent<EventTrigger>();
 
         GTween bgTween = null;
-        UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => {
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, () => {
             bgTween?.Kill();
             bgTween = bgImg.GTColor(UIColors.ObjectActiveLightBright, 0.12f)
                 .SetEasing(Easing.OutSine);
             MainCore.TC.Play(bgTween);
         }, trigger);
 
-        UnityUtils.AddEvent(EventTriggerType.PointerExit, e => {
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, () => {
             bgTween?.Kill();
             bgTween = bgImg.GTColor(UIColors.ObjectButton, 0.12f)
                 .SetEasing(Easing.OutSine);

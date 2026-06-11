@@ -1,13 +1,14 @@
 ﻿using MelonLoader;
 using MelonLoader.Utils;
+using Overlayer;
 using Overlayer.Compat.Interface;
 using Overlayer.Core;
 
 #if ML
-[assembly: MelonInfo(typeof(Overlayer.Loader.Loader), Overlayer.Core.Info.Name, Overlayer.Core.Info.Version, Overlayer.Core.Info.Author, Overlayer.Core.Info.GithubLink)]
+[assembly: MelonInfo(typeof(Loader), Overlayer.Core.Info.Name, Overlayer.Core.Info.Version, Overlayer.Core.Info.Author, Overlayer.Core.Info.GithubLink)]
 #endif
 
-namespace Overlayer.Loader;
+namespace Overlayer;
 
 #if ML
 public class Loader : MelonMod, IOverlayerHost, IOverlayerLogger {
@@ -16,7 +17,7 @@ public class Loader : MelonMod, IOverlayerHost, IOverlayerLogger {
 
     public string OverlayerFilePath => MelonEnvironment.UserDataDirectory;
 
-    public string OverlayerDLLPath => MelonEnvironment.UserLibsDirectory;
+    public HarmonyLib.Harmony OverlayerHarmony => HarmonyInstance;
 
     public override void OnInitializeMelon() => MainCore.Initialize(this);
 

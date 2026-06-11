@@ -133,8 +133,8 @@ public static class GenerateUI {
         EventTrigger trigger = rect.gameObject.GetComponent<EventTrigger>()
             ?? rect.gameObject.AddComponent<EventTrigger>();
 
-        UnityUtils.AddEvent(EventTriggerType.PointerEnter, e => button.OnHoverEnter(), trigger);
-        UnityUtils.AddEvent(EventTriggerType.PointerExit, e => button.OnHoverExit(), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, () => button.OnHoverEnter(), trigger);
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, () => button.OnHoverExit(), trigger);
 
         return button;
     }
@@ -243,12 +243,12 @@ public static class GenerateUI {
             ?? rect.gameObject.AddComponent<EventTrigger>();
         bool isDragging = false;
 
-        UnityUtils.AddEvent(EventTriggerType.BeginDrag, _ => {
+        UnityUtils.AddEvent(EventTriggerType.BeginDrag, () => {
             isDragging = true;
             SetFromMouse();
         }, trigger);
 
-        UnityUtils.AddEvent(EventTriggerType.Drag, _ => {
+        UnityUtils.AddEvent(EventTriggerType.Drag, () => {
             if(isDragging && OVC_Input.GetMouseButton(0)) {
                 SetFromMouse();
             } else {
@@ -256,14 +256,14 @@ public static class GenerateUI {
             }
         }, trigger);
 
-        UnityUtils.AddEvent(EventTriggerType.EndDrag, _ => {
+        UnityUtils.AddEvent(EventTriggerType.EndDrag, () => {
             if(isDragging) {
                 isDragging = false;
                 slider.OnComplete?.Invoke(slider.Value);
             }
         }, trigger);
 
-        UnityUtils.AddEvent(EventTriggerType.PointerUp, _ => {
+        UnityUtils.AddEvent(EventTriggerType.PointerUp, () => {
             if(isDragging) {
                 isDragging = false;
                 slider.OnComplete?.Invoke(slider.Value);
@@ -429,7 +429,7 @@ public static class GenerateUI {
             EventTrigger trigger = row.AddComponent<EventTrigger>();
             GTween hoverSeq = null;
 
-            UnityUtils.AddEvent(EventTriggerType.PointerEnter, _ => {
+            UnityUtils.AddEvent(EventTriggerType.PointerEnter, () => {
                 hoverSeq?.Kill();
                 hoverSeq = GTweenSequenceBuilder.New()
                     .Append(
@@ -441,7 +441,7 @@ public static class GenerateUI {
                 MainCore.TC.Play(hoverSeq);
             }, trigger);
 
-            UnityUtils.AddEvent(EventTriggerType.PointerExit, _ => {
+            UnityUtils.AddEvent(EventTriggerType.PointerExit, () => {
                 hoverSeq?.Kill();
                 hoverSeq = GTweenSequenceBuilder.New()
                     .Append(
@@ -616,7 +616,7 @@ public static class GenerateUI {
     }
 
     private static void AddClick(EventTrigger trigger, Action<InputButton> onClick)
-        => UnityUtils.AddEvent(EventTriggerType.PointerClick, (_) => onClick?.Invoke(OVC_Input.GetClickMouseButton()), trigger);
+        => UnityUtils.AddEvent(EventTriggerType.PointerClick, () => onClick?.Invoke(OVC_Input.GetClickMouseButton()), trigger);
 
     private static void AddOutlineHover(GameObject obj, EventTrigger trigger) {
         GTween hoverSeq = null;
@@ -639,7 +639,7 @@ public static class GenerateUI {
         Color baseColor = UIColors.ObjectActive;
         hoverImage.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0f);
 
-        UnityUtils.AddEvent(EventTriggerType.PointerEnter, (e) => {
+        UnityUtils.AddEvent(EventTriggerType.PointerEnter, () => {
             hoverSeq?.Kill();
             hoverSeq = GTweenSequenceBuilder.New()
                 .Append(GTweenExtensions.Tween(
@@ -657,7 +657,7 @@ public static class GenerateUI {
             MainCore.TC.Play(hoverSeq);
         }, trigger);
 
-        UnityUtils.AddEvent(EventTriggerType.PointerExit, (e) => {
+        UnityUtils.AddEvent(EventTriggerType.PointerExit, () => {
             hoverSeq?.Kill();
             hoverSeq = GTweenSequenceBuilder.New()
                 .Append(GTweenExtensions.Tween(
@@ -734,13 +734,13 @@ public static class GenerateUI {
 
         UnityUtils.AddEvent(
             EventTriggerType.PointerEnter,
-            _ => Tooltip.Show(getText()),
+            () => Tooltip.Show(getText()),
             trigger
         );
 
         UnityUtils.AddEvent(
             EventTriggerType.PointerExit,
-            _ => Tooltip.Hide(),
+            () => Tooltip.Hide(),
             trigger
         );
 

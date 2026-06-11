@@ -19,6 +19,7 @@ namespace Overlayer.Core;
 public sealed class OverlayerRuntime {
     public Version Version { get; }
     public Assembly Assembly { get; }
+    public HarmonyLib.Harmony Harmony { get; }
 
     public OverlayerLogger Logger { get; }
 
@@ -56,6 +57,7 @@ public sealed class OverlayerRuntime {
 
         Version = new Version(Info.Version);
         Assembly = Assembly.GetExecutingAssembly();
+        Harmony = host.OverlayerHarmony;
         Logger = new OverlayerLogger(
             host.OverlayerLogger
         );

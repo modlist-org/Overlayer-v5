@@ -3,9 +3,7 @@ using Overlayer.Resource;
 using UnityEngine;
 using UnityEngine.UI;
 using GTweens.Tweens;
-using GTweens.Extensions;
 using Overlayer.Tween;
-
 using GTweens.Builders;
 using GTweens.Easings;
 using GTweenExtensions = GTweens.Extensions.GTweenExtensions;

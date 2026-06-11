@@ -65,7 +65,7 @@ public static class UICore {
         canvasObj.AddComponent<GraphicRaycaster>();
 
         CreatePanel();
-        ResizeHandle.CreateResizeHandles(Panel);
+        ResizeHandle.CreateResizeHandles(Panel, canvasObj.GetComponent<RectTransform>());
         Tooltip.Initialize(canvasObj.transform);
 
         _onPageSettings = state => {
