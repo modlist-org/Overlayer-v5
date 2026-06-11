@@ -273,6 +273,8 @@ internal static class PageSettings {
             scaleSeq?.Kill();
 
             float scaleStart = UICore.PanelScale;
+
+            Vector2 targetSize = UICore.DefaultPanelSize;
             UICore.LastPanelSize = targetSize;
 
             scaleSeq = GTweenSequenceBuilder.New()
@@ -286,9 +288,8 @@ internal static class PageSettings {
                 )
                 .Join(
                     UICore.Panel.GTSizeDelta(targetSize, 0.4f)
-                        .SetEasing(Easing.OutExpo)
-                )
-                .Build();
+                    .SetEasing(Easing.OutExpo)
+                ).Build();
 
             MainCore.TC.Play(scaleSeq);
         };
