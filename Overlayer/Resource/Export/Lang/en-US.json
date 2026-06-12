@@ -19,6 +19,7 @@
     "SETTINGS": "Settings",
     "SHOW_OVERLAYER_PANEL_AT_STARTUP": "Show Overlayer Panel at Startup",
     "SHOW_TOOLTIP": "Show Tooltip",
+    "SLIDER_SENSITIVITY": "Slider Sensitivity",
     "UI_SCALE": "UI Scale"
   }
 }

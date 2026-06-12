@@ -19,6 +19,7 @@
     "SETTINGS": "설정",
     "SHOW_OVERLAYER_PANEL_AT_STARTUP": "시작 시 오버레이어 패널 표시",
     "SHOW_TOOLTIP": "도움말 표시",
+    "SLIDER_SENSITIVITY": "슬라이더 감도",
     "UI_SCALE": "화면 배율"
   }
 }
