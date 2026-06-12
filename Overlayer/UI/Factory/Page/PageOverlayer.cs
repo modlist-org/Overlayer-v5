@@ -226,6 +226,8 @@ internal static class PageOverlayer {
         txt.color = Color.white;
         txt.raycastTarget = false;
 
+        GenerateUI.AddOutlineHover(bg, bg.AddComponent<EventTrigger>());
+
         GenerateUI.AddButton(bg, btn => {
             switch(btn) {
                 case InputButton.Left:
@@ -233,7 +235,7 @@ internal static class PageOverlayer {
                     settingPage?.Open(canvas);
                     break;
             }
-        }, bg.AddComponent<EventTrigger>());
+        });
 
         return bg;
     }
@@ -276,13 +278,16 @@ internal static class PageOverlayer {
         txt.raycastTarget = false;
 
         var trigger = go.AddComponent<EventTrigger>();
+
+        GenerateUI.AddOutlineHover(go, trigger);
+
         GenerateUI.AddButton(go, btn => {
             switch(btn) {
                 case InputButton.Left:
                     onClick?.Invoke();
                     break;
             }
-        }, trigger);
+        });
 
         GTween bgTween = null;
         UnityUtils.AddEvents(trigger,

@@ -249,6 +249,8 @@ internal static class PageSettings {
         var middleClickToggleTr = middleClickToggle.Label.gameObject.AddComponent<TextLocalization>().Init("MIDDLE_CLICK_TO_SET_AS_DEFAULT", "Middle-click to set as default");
         objects[middleClickToggleTr] = (overlayerText.gameObject, middleClickRow.gameObject);
 
+        GTween scaleSeq = null;
+
         var uiScaleRow = GenerateUI.Row(content.transform);
         var uiScale = GenerateUI.Slider(
             uiScaleRow,
@@ -256,43 +258,41 @@ internal static class PageSettings {
             0.8f,
             1.6f,
             MainCore.Conf.UIScale,
+            "0.00x",
+            true,
             uiScaleFilter,
-            null,
-            null,
+            value => MainCore.Conf.UIScale = value,
+            value => {
+                MainCore.Conf.UIScale = value;
+                MainCore.ConfMgr.RequestSave();
+
+                scaleSeq?.Kill();
+
+                float scaleStart = UICore.PanelScale;
+
+                Vector2 targetSize = UICore.DefaultPanelSize;
+                UICore.LastPanelSize = targetSize;
+
+                scaleSeq = GTweenSequenceBuilder.New()
+                    .Append(
+                        GTweenExtensions.Tween(
+                            () => scaleStart,
+                            x => UICore.PanelScale = x,
+                            value,
+                            0.4f
+                        ).SetEasing(Easing.OutExpo)
+                    )
+                    .Join(
+                        UICore.Panel.GTSizeDelta(targetSize, 0.4f)
+                        .SetEasing(Easing.OutExpo)
+                    ).Build();
+
+                MainCore.TC.Play(scaleSeq);
+            },
             "UI Scale",
             "ui_scale"
         );
-        uiScale.Format = "0.00x";
-        uiScale.OnChanged = value => MainCore.Conf.UIScale = value;
-        GTween scaleSeq = null;
         var targetSize = UICore.DefaultPanelSize;
-        uiScale.OnComplete = value => {
-            MainCore.Conf.UIScale = value;
-            MainCore.ConfMgr.RequestSave();
-
-            scaleSeq?.Kill();
-
-            float scaleStart = UICore.PanelScale;
-
-            Vector2 targetSize = UICore.DefaultPanelSize;
-            UICore.LastPanelSize = targetSize;
-
-            scaleSeq = GTweenSequenceBuilder.New()
-                .Append(
-                    GTweenExtensions.Tween(
-                        () => scaleStart,
-                        x => UICore.PanelScale = x,
-                        value,
-                        0.4f
-                    ).SetEasing(Easing.OutExpo)
-                )
-                .Join(
-                    UICore.Panel.GTSizeDelta(targetSize, 0.4f)
-                    .SetEasing(Easing.OutExpo)
-                ).Build();
-
-            MainCore.TC.Play(scaleSeq);
-        };
         var uiScaleTr = uiScale.Label.gameObject.AddComponent<TextLocalization>().Init("UI_SCALE", "UI Scale");
 
         objects[uiScaleTr] = (overlayerText.gameObject, uiScaleRow.gameObject);

@@ -77,6 +77,7 @@ public static class GenerateUI {
             onChanged
         );
 
+        AddOutlineHover(rect.gameObject, rect.gameObject.AddComponent<EventTrigger>());
         AddButton(rect.gameObject, btn => {
             switch(btn) {
                 case InputButton.Left:
@@ -93,7 +94,7 @@ public static class GenerateUI {
 
                     break;
             }
-        }, rect.gameObject.AddComponent<EventTrigger>());
+        });
 
         return toggle;
     }
@@ -122,13 +123,17 @@ public static class GenerateUI {
             onClick
         );
 
+        var trigger = rect.gameObject.AddComponent<EventTrigger>();
+
+        AddOutlineHover(rect.gameObject, trigger);
+
         AddButton(rect.gameObject, btn => {
             if(btn == InputButton.Left) {
                 button.Click();
             }
-        }, null);
+        });
 
-        UnityUtils.AddEvents(rect.gameObject.AddComponent<EventTrigger>(),
+        UnityUtils.AddEvents(trigger,
             (EventTriggerType.PointerEnter, button.OnHoverEnter),
             (EventTriggerType.PointerExit, button.OnHoverExit)
         );
@@ -142,6 +147,8 @@ public static class GenerateUI {
         float min,
         float max,
         float value,
+        string format,
+        bool useInputClamp,
         Func<float, float> filter,
         Action<float> onChanged,
         Action<float> onComplete,
@@ -168,39 +175,51 @@ public static class GenerateUI {
         label.text = text;
         label.alignment = TextAlignmentOptions.Left;
 
-        TextMeshProUGUI valueText = AddText(rect);
-        valueText.alignment = TextAlignmentOptions.Right;
+        GameObject inputObj = new("ValueInput");
+        inputObj.transform.SetParent(rect, false);
 
-        var valueTextRect = valueText.gameObject.GetComponent<RectTransform>();
-        valueTextRect.offsetMin = Vector2.zero;
-        valueTextRect.offsetMax = new(-16f, 0f);
+        RectTransform inputRect = inputObj.AddComponent<RectTransform>();
+        inputRect.anchorMin = Vector2.zero;
+        inputRect.anchorMax = Vector2.one;
+        inputRect.offsetMin = new(16f, 4f);
+        inputRect.offsetMax = new(-8f, -4f);
+        inputObj.AddComponent<RectMask2D>();
+
+        TMP_InputField inputField = inputObj.AddComponent<TMP_InputField>();
+        var textComp = AddText(inputObj.transform);
+        textComp.alignment = TextAlignmentOptions.Right;
+        textComp.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+        inputField.textComponent = textComp;
+        inputField.textViewport = inputRect;
 
         Image fillImg = fill.AddComponent<Image>();
         fillImg.sprite = MainCore.Spr.Get(UISliceSprite.Circle256P2048);
         fillImg.type = Image.Type.Sliced;
-
         fill.AddComponent<Mask>().showMaskGraphic = true;
 
         GameObject changeUp = AddSmallChangedCircle(fillRect);
         Image changeUpImg = changeUp.GetComponent<Image>();
 
+        var trigger = rect.gameObject.AddComponent<EventTrigger>();
+
         UISlider slider = new(
-            id,
-            rect,
-            fillRect,
-            fillImg,
-            label,
-            valueText,
-            changeImg,
-            changeUpImg,
-            defaultValue,
-            min,
-            max,
-            value,
-            filter,
-            onChanged,
-            onComplete
+            id, rect, fillRect, fillImg, label, inputField,
+            changeImg, changeUpImg, AddOutlineHover(rect.gameObject, trigger), defaultValue, min, max,
+            value, format, useInputClamp, filter, onChanged, onComplete
         );
+
+        AddButton(rect.gameObject, e => {
+            switch(e) {
+                case InputButton.Middle:
+                    if(!MainCore.Conf.MiddleClickToDefault) {
+                        break;
+                    }
+                    slider.Set(Apply(defaultValue));
+                    slider.OnComplete?.Invoke(slider.Value);
+                    break;
+            }
+        });
 
         float Apply(float v) {
             v = filter != null ? filter(v) : v;
@@ -217,37 +236,9 @@ public static class GenerateUI {
             slider.Set(Apply(v));
         }
 
-        var trigger = rect.gameObject.AddComponent<EventTrigger>();
-
-        AddButton(rect.gameObject, e => {
-            switch(e) {
-                case InputButton.Middle:
-                    if(!MainCore.Conf.MiddleClickToDefault) {
-                        break;
-                    }
-                    slider.Set(Apply(defaultValue));
-                    slider.OnComplete?.Invoke(slider.Value);
-                    break;
-            }
-        }, trigger);
-
         bool isDragging = false;
 
         UnityUtils.AddEvents(trigger,
-            (EventTriggerType.PointerClick, (e) => {
-#pragma warning disable IDE0019
-                PointerEventData pointerData =
-#pragma warning restore IDE0019
-#if ML && IL2CPP
-                e.TryCast<PointerEventData>();
-#else
-                e as PointerEventData;
-#endif
-                if(pointerData != null && pointerData.button == InputButton.Left) {
-                    SetFromMouse();
-                    slider.OnComplete?.Invoke(slider.Value);
-                }
-            }),
             (EventTriggerType.BeginDrag, (e) => {
                 if(!OVC_Input.GetMouseButton(0)) {
                     return;
@@ -412,6 +403,8 @@ public static class GenerateUI {
 
         dropdown.OnLayoutChanged = UpdateHeight;
 
+        AddOutlineHover(rect.gameObject, rect.gameObject.AddComponent<EventTrigger>());
+
         AddButton(rect.gameObject, btn => {
             switch(btn) {
                 case InputButton.Left:
@@ -432,7 +425,7 @@ public static class GenerateUI {
                     }
                     break;
             }
-        }, rect.gameObject.AddComponent<EventTrigger>());
+        });
 
         dropdown.RebuildList();
         UpdateHeight();
@@ -524,6 +517,8 @@ public static class GenerateUI {
             onChanged
         );
 
+        AddOutlineHover(rect.gameObject, rect.gameObject.AddComponent<EventTrigger>());
+
         AddButton(rect.gameObject, btn => {
             switch(btn) {
                 case InputButton.Middle:
@@ -536,7 +531,7 @@ public static class GenerateUI {
 
                     break;
             }
-        }, rect.gameObject.AddComponent<EventTrigger>());
+        });
 
         return input;
     }
@@ -564,15 +559,14 @@ public static class GenerateUI {
         return rect;
     }
 
-    public static void AddButton(GameObject obj, Action<InputButton> onClick, EventTrigger outlineTrigger) {
-        obj.AddComponent<OventHandler>().OnClick += onClick;
+    public static OventHandler AddButton(GameObject obj, Action<InputButton> onClick) {
+        var com = obj.AddComponent<OventHandler>();
+        com.OnClick += onClick;
 
-        if(outlineTrigger != null) {
-            AddOutlineHover(obj, outlineTrigger);
-        }
+        return com;
     }
 
-    private static void AddOutlineHover(GameObject obj, EventTrigger trigger) {
+    public static Image AddOutlineHover(GameObject obj, EventTrigger trigger) {
         GTween hoverSeq = null;
 
         GameObject hover = new("Hover");
@@ -615,6 +609,8 @@ public static class GenerateUI {
                 MainCore.TC.Play(hoverSeq);
             })
         );
+
+        return hoverImage;
     }
 
     public static TextMeshProUGUI AddText(Transform parent, bool noPad = false) => CreateText(parent, 24f, false, noPad);

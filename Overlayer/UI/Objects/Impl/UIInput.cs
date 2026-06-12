@@ -5,8 +5,6 @@ using GTweens.Extensions;
 using GTweens.Easings;
 using GTweens.Builders;
 using Overlayer.Core;
-using Newtonsoft.Json.Linq;
-
 
 #if ML && IL2CPP
 using Il2CppInterop.Runtime;
@@ -47,7 +45,7 @@ public sealed class UIInput : UIObject {
         Core = new UIInputCore(inputField, placeholder, value, val => {
             UpdateVisual();
             onChanged?.Invoke(val);
-        });
+        }, null);
 
         RegisterTick();
         UpdateVisual(true);

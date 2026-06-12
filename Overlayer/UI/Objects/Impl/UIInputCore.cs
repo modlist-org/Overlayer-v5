@@ -3,27 +3,36 @@ using GTweens.Easings;
 using GTweens.Extensions;
 using GTweens.Tweens;
 using Overlayer.Core;
-using TMPro;
 using UnityEngine;
+using Newtonsoft.Json.Linq;
+
+
+#if ML && IL2CPP
+using Il2CppInterop.Runtime;
+using Il2CppTMPro;
+#else
+using TMPro;
+#endif
 
 namespace Overlayer.UI.Objects.Impl;
 
 public class UIInputCore {
     public string Value { get; private set; }
     public Action<string> OnChanged { get; }
+    public Action<string> OnEndEdit { get; }
     public TMP_InputField InputField { get; }
     public TextMeshProUGUI Placeholder { get; }
 
     private GTween caretTween, placeholderTween;
     private bool caretLooping, hasFocused;
 
-    public UIInputCore(TMP_InputField inputField, TextMeshProUGUI placeholder, string value, Action<string> onChanged) {
+    public UIInputCore(TMP_InputField inputField, TextMeshProUGUI placeholder, string value, Action<string> onChanged, Action<string> onEndEdit) {
         InputField = inputField;
         Placeholder = placeholder;
         Value = value;
         OnChanged = onChanged;
+        OnEndEdit = onEndEdit;
 
-        SetupInputField();
         InputField.onValueChanged.AddListener(
 #if ML && IL2CPP
             DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<string>>(new Action<string>(
@@ -33,12 +42,26 @@ public class UIInputCore {
             ))
 #endif
         );
+
+        InputField.onEndEdit.AddListener(
+#if ML && IL2CPP
+            DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction<string>>(new Action<string>(
+#endif
+                OnValueEndEdit
+#if ML && IL2CPP
+            ))
+#endif
+        );
+
+        SetupInputField();
     }
 
     public void OnTick() {
         bool focused = InputField.isFocused;
-        if(focused == hasFocused)
+        if(focused == hasFocused) {
             return;
+        }
+
         hasFocused = focused;
 
         UpdateCaretAnimation(focused);
@@ -70,6 +93,11 @@ public class UIInputCore {
         Value = value;
         UpdateCaretAnimation(InputField.isFocused);
         OnChanged?.Invoke(value);
+    }
+
+    private void OnValueEndEdit(string value) {
+        OnChanged?.Invoke(value);
+        OnEndEdit?.Invoke(value);
     }
 
     private void UpdateCaretAnimation(bool focused) {
@@ -148,6 +176,10 @@ public class UIInputCore {
     }
 
     private void UpdatePlaceholder(bool focused) {
+        if(Placeholder == null) {
+            return;
+        }
+
         placeholderTween?.Kill();
 
         float target = focused ? 0f : 0.2f;
@@ -171,6 +203,5 @@ public class UIInputCore {
     public void Dispose() {
         caretTween?.Kill();
         placeholderTween?.Kill();
-        InputField.onValueChanged.RemoveListener(OnValueChanged);
     }
 }
