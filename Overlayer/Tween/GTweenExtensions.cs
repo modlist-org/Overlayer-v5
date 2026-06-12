@@ -1,5 +1,4 @@
-﻿using GTweens.Extensions;
-using GTweens.Tweens;
+﻿using GTweens.Tweens;
 using UnityEngine;
 using UnityEngine.UI;
 

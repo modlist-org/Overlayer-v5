@@ -18,13 +18,13 @@ public static class Parser {
             .OrderBy(m => m.Index);
 
         return (from m in matches
-            let name = m.Groups["name"].Value
-            let argsRaw = m.Groups["arg"].Success
-                ? m.Groups["arg"].Value
-                : m.Groups["args"].Success ? m.Groups["args"].Value : ""
-            let args = (string[])(string.IsNullOrWhiteSpace(argsRaw)
-                ? []
-                : [.. argsRaw.Split(',').Select(s => s.Trim())])
-            select new ParsedTag(m.Value, name, args, m.Index, m.Length)).ToList();
+                let name = m.Groups["name"].Value
+                let argsRaw = m.Groups["arg"].Success
+                    ? m.Groups["arg"].Value
+                    : m.Groups["args"].Success ? m.Groups["args"].Value : ""
+                let args = (string[])(string.IsNullOrWhiteSpace(argsRaw)
+                    ? []
+                    : [.. argsRaw.Split(',').Select(s => s.Trim())])
+                select new ParsedTag(m.Value, name, args, m.Index, m.Length)).ToList();
     }
 }

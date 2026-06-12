@@ -296,13 +296,15 @@ internal static class PageOverlayer {
                 bgTween = bgImg.GTColor(UIColors.ObjectActiveLightBright, 0.12f)
                     .SetEasing(Easing.OutSine);
                 MainCore.TC.Play(bgTween);
-            }),
+            }
+        ),
             (EventTriggerType.PointerExit, () => {
                 bgTween?.Kill();
                 bgTween = bgImg.GTColor(UIColors.ObjectButton, 0.12f)
                     .SetEasing(Easing.OutSine);
                 MainCore.TC.Play(bgTween);
-            })
+            }
+        )
         );
 
         return go;

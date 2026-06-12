@@ -1,7 +1,6 @@
 ﻿using GTweens.Builders;
 using GTweens.Easings;
 using GTweens.Tweens;
-using Newtonsoft.Json.Linq;
 using Overlayer.Async;
 using Overlayer.Core;
 using Overlayer.IO;
@@ -80,13 +79,13 @@ internal static class PageSettings {
                 bool isBlank = string.IsNullOrWhiteSpace(value);
                 Dictionary<GameObject, bool> labelActivationMap = [];
 
-                foreach (var pair in objects.Where(pair => pair.Value.LabelRow != null)) {
+                foreach(var pair in objects.Where(pair => pair.Value.LabelRow != null)) {
                     labelActivationMap[pair.Value.LabelRow] = isBlank;
                 }
 
                 string normalizedQuery = StringUtils.Normalize(value);
 
-                if (MainCore.Conf.Language == "ko-KR") {
+                if(MainCore.Conf.Language == "ko-KR") {
                     normalizedQuery = StringUtils.NormalizeToHangulChosung(normalizedQuery);
                 }
 
@@ -98,7 +97,7 @@ internal static class PageSettings {
                     }
 
                     string normalizedTarget = labelLoc != null ? StringUtils.Normalize(labelLoc.Value) : string.Empty;
-                    if (MainCore.Conf.Language == "ko-KR" && !string.IsNullOrEmpty(normalizedTarget)) {
+                    if(MainCore.Conf.Language == "ko-KR" && !string.IsNullOrEmpty(normalizedTarget)) {
                         normalizedTarget = StringUtils.NormalizeToHangulChosung(normalizedTarget);
                     }
 

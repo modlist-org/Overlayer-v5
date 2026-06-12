@@ -22,8 +22,8 @@ public class UnityUtils {
     }
 
     public static void AddEvents(EventTrigger trigger, params (EventTriggerType type, Action<BaseEventData> cb)[] events) {
-        foreach(var item in events) {
-            AddEvent(trigger, item.type, item.cb);
+        foreach(var (type, cb) in events) {
+            AddEvent(trigger, type, cb);
         }
     }
 
@@ -31,8 +31,8 @@ public class UnityUtils {
         => AddEvent(trigger, type, (_) => cb());
 
     public static void AddEvents(EventTrigger trigger, params (EventTriggerType type, Action cb)[] events) {
-        foreach(var item in events) {
-            AddEvent(trigger, item.type, item.cb);
+        foreach(var (type, cb) in events) {
+            AddEvent(trigger, type, cb);
         }
     }
 }

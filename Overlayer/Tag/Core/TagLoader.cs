@@ -13,7 +13,7 @@ public static class TagLoader {
                         continue;
                     }
 
-                    switch (member) {
+                    switch(member) {
                         case PropertyInfo pi: {
                             var method = pi.GetGetMethod();
                             if(method != null) {

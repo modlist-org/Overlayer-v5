@@ -61,24 +61,12 @@ public static class OVC_Input {
                 .MakeGenericType(typeof(Vector2)).GetMethod("ReadValue");
         }
 
-        switch(Application.platform) {
-            case RuntimePlatform.WindowsPlayer:
-            case RuntimePlatform.WindowsEditor:
-                _osAPI = new OVC_Win();
-                break;
-            case RuntimePlatform.LinuxPlayer:
-            case RuntimePlatform.LinuxEditor:
-                _osAPI = new OVC_Linux();
-                break;
-            case RuntimePlatform.OSXPlayer:
-            case RuntimePlatform.OSXEditor:
-                _osAPI = new OVC_Mac();
-                break;
-            default:
-                _osAPI = null;
-                break;
-        }
-
+        _osAPI = Application.platform switch {
+            RuntimePlatform.WindowsPlayer or RuntimePlatform.WindowsEditor => new OVC_Win(),
+            RuntimePlatform.LinuxPlayer or RuntimePlatform.LinuxEditor => new OVC_Linux(),
+            RuntimePlatform.OSXPlayer or RuntimePlatform.OSXEditor => new OVC_Mac(),
+            _ => null,
+        };
         _initialized = true;
     }
 

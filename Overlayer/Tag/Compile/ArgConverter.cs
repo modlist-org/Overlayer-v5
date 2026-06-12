@@ -39,7 +39,7 @@ public static class ArgConverter {
             return decimal.Parse(value);
         }
 
-        return type.IsEnum 
+        return type.IsEnum
             ? Enum.Parse(type, value, true)
             : System.Convert.ChangeType(value, type);
     }

@@ -11,7 +11,6 @@ using Overlayer.Tween;
 using GTweens.Builders;
 using GTweens.Easings;
 using GTweenExtensions = GTweens.Extensions.GTweenExtensions;
-using Overlayer.Compat.OVC;
 
 #if ML && IL2CPP
 using Il2CppTMPro;
@@ -203,14 +202,16 @@ public class UIDropDown<T> : UIObject {
                         .Append(rowImage.GTColor(UIColors.ObjectActive, 0.12f).SetEasing(Easing.OutSine))
                         .Build();
                     MainCore.TC.Play(hoverSeq);
-                }),
+                }
+            ),
                 (EventTriggerType.PointerExit, (e) => {
                     hoverSeq?.Kill();
                     hoverSeq = GTweenSequenceBuilder.New()
                         .Append(rowImage.GTColor(Color.clear, 0.12f).SetEasing(Easing.OutSine))
                         .Build();
                     MainCore.TC.Play(hoverSeq);
-                }),
+                }
+            ),
                 (EventTriggerType.PointerClick, (e) => {
 #pragma warning disable IDE0019
                     PointerEventData pointerData =
@@ -227,7 +228,8 @@ public class UIDropDown<T> : UIObject {
                     Set(item);
                     rowImage.color = Color.clear;
                     SetExpanded(false);
-                })
+                }
+            )
             );
         }
     }

@@ -6,8 +6,6 @@ using GTweens.Extensions;
 using GTweens.Builders;
 using GTweens.Easings;
 using NCalc;
-using static UnityEngine.EventSystems.StandaloneInputModule;
-
 
 #if ML && IL2CPP
 using Il2CppTMPro;

@@ -12,8 +12,6 @@ using GTweens.Easings;
 using GTweens.Builders;
 using Overlayer.Compat.OVC;
 using GTweenExtensions = GTweens.Extensions.GTweenExtensions;
-using System.Collections;
-
 
 #if ML && IL2CPP
 using Il2CppTMPro;
@@ -247,7 +245,8 @@ public static class GenerateUI {
                 resetPos = Vector2Int.RoundToInt(OVC_Input.OSMousePosition);
                 previousMousePos = OVC_Input.MousePosition;
                 justWarped = false;
-            }),
+            }
+        ),
             (EventTriggerType.Drag, (e) => {
                 if(isDragging && OVC_Input.GetMouseButton(0)) {
                     Vector2 currentMousePos = OVC_Input.MousePosition;
@@ -284,7 +283,8 @@ public static class GenerateUI {
                 } else {
                     isDragging = false;
                 }
-            }),
+            }
+        ),
             (EventTriggerType.EndDrag, (e) => {
                 if(isDragging) {
                     isDragging = false;
@@ -293,7 +293,8 @@ public static class GenerateUI {
                     OVC_Input.OSMousePosition = resetPos;
                     Cursor.visible = true;
                 }
-            }),
+            }
+        ),
             (EventTriggerType.PointerUp, (e) => {
                 if(isDragging) {
                     return;
@@ -317,7 +318,8 @@ public static class GenerateUI {
 
                 inputField.Select();
                 inputField.ActivateInputField();
-            })
+            }
+        )
         );
 
         slider.Set(Apply(value), false);
@@ -650,7 +652,8 @@ public static class GenerateUI {
                         1f, 0.1f
                     ).SetEasing(Easing.OutSine)).Build();
                 MainCore.TC.Play(hoverSeq);
-            }),
+            }
+        ),
             (EventTriggerType.PointerExit, () => {
                 hoverSeq?.Kill();
                 hoverSeq = GTweenSequenceBuilder.New()
@@ -660,7 +663,8 @@ public static class GenerateUI {
                         0f, 0.1f
                     ).SetEasing(Easing.OutSine)).Build();
                 MainCore.TC.Play(hoverSeq);
-            })
+            }
+        )
         );
 
         return hoverImage;

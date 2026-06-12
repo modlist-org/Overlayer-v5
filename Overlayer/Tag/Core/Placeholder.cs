@@ -33,11 +33,11 @@ public readonly struct Placeholder(
 
         hash.Add(Name);
 
-        if (Args == null) {
+        if(Args == null) {
             return hash.ToHashCode();
         }
 
-        foreach (var t in Args) {
+        foreach(var t in Args) {
             hash.Add(t);
         }
 

@@ -101,7 +101,7 @@ public sealed class TextEngineCore {
         var sb = new StringBuilder(Text.Length);
         int last = 0;
 
-        foreach (var s in segs) {
+        foreach(var s in segs) {
             sb.Append(Text, last, s.Index - last);
             sb.Append(s.Replacer.Get());
 

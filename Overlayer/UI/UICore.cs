@@ -12,7 +12,6 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using GTweens.Tweens;
 using GTweens.Builders;
-using GTweens.Extensions;
 using Overlayer.Tween;
 using GTweens.Easings;
 using Overlayer.Compat.OVC;
@@ -168,7 +167,7 @@ public static class UICore {
                         1.4f
                     ).SetEasing(Easing.OutSine))
                     .Build();
-                
+
                 MainCore.TC.Play(firstRunHelperImageSequence);
                 MainCore.TC.Play(secondRunHelperTextSequence);
             });
@@ -178,7 +177,7 @@ public static class UICore {
     private static void EndFirstRunHelper() {
         MainCore.Conf.IsFirstRun = false;
         MainCore.ConfMgr.Save();
-        
+
         firstRunHelperImageSequence?.Kill();
         secondRunHelperTextSequence?.Kill();
 

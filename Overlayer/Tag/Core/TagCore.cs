@@ -37,7 +37,7 @@ public class TagCore {
         IsProperty = member is PropertyInfo;
         IsField = member is FieldInfo;
 
-        switch (member) {
+        switch(member) {
             case MethodInfo method:
                 Parameters = method.GetParameters();
                 ReturnType = method.ReturnType;

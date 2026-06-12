@@ -47,9 +47,9 @@ public static class StringUtils {
 
         char[] chars = [.. input.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant)];
         return new string(chars);
-    }   
-    
-    private static readonly string[] ChosungTable =  [
+    }
+
+    private static readonly string[] ChosungTable = [
         "ㄱ", "ㄲ", "ㄴ", "ד", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ",
         "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"
     ];
@@ -58,14 +58,14 @@ public static class StringUtils {
     /// (Magic Hangul Tool)
     /// </summary>
     public static string NormalizeToHangulChosung(string input) {
-        if (string.IsNullOrEmpty(input)) {
+        if(string.IsNullOrEmpty(input)) {
             return input;
         }
 
         var result = new System.Text.StringBuilder();
 
-        foreach (char c in input) {
-            if (c >= 0xAC00 && c <= 0xD7A3) {
+        foreach(char c in input) {
+            if(c is >= (char)0xAC00 and <= (char)0xD7A3) {
                 int index = (c - 0xAC00) / 588; // ㅋ (lol)
                 result.Append(ChosungTable[index]);
             } else {
